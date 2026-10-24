@@ -79,5 +79,13 @@ DerivedDataCache/*
 
 # Third-party assets from Fab (license: no public redistribution)
 Content/Pabs/
-Content/__ExternalActors__/Pabs/
-Content/__ExternalObjects__/Pabs/
+
+# External actors/objects: track only my levels (Content/Maps), skip demo maps etc.
+/Content/__ExternalActors__/*
+!/Content/__ExternalActors__/Maps/
+/Content/__ExternalObjects__/*
+!/Content/__ExternalObjects__/Maps/
+
+# Editor personal folders
+Content/Developers/
+Content/Collections/
