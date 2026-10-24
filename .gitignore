@@ -79,3 +79,5 @@ DerivedDataCache/*
 
 # Third-party assets from Fab (license: no public redistribution)
 Content/Pabs/
+Content/__ExternalActors__/Pabs/
+Content/__ExternalObjects__/Pabs/
