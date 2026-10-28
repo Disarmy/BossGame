@@ -26,7 +26,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stencil")
 	void SetStencil(EStencilType Type, bool bIncludeAttached = true);
 
-
+	void Refresh() { SetStencil(StencilType); }
 private:
 	UPROPERTY(EditAnywhere, Category = "Stencil")
 	EStencilType StencilType = EStencilType::None;
