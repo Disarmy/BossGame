@@ -16,4 +16,7 @@ namespace CTags
 
 	// Event
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Hit);
+
+	// Lock
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Lock_Move);
 }
