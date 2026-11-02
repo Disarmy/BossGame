@@ -8,10 +8,25 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/CapsuleComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "GAS/CGameplayAbility.h"
+#include "GAS/CGameplayTags.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 ACPlayerController::ACPlayerController()
 {
 	bShowMouseCursor = true;
+}
+
+bool ACPlayerController::GetAimLocation(FVector& OutLocation) const
+{
+	FHitResult Hit;
+	if (!GetHitResultUnderCursor(ECC_Cursor, false, Hit)) {
+		return false;
+	}
+
+	OutLocation = Hit.Location;
+	return true;
 }
 
 void ACPlayerController::BeginPlay()
@@ -33,11 +48,24 @@ void ACPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent)) {
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACPlayerController::OnMove);
+		
+		for (const TPair<TObjectPtr<UInputAction>, FGameplayTag>& Pair : AbilityInputs) {
+			if (Pair.Key) {
+				Input->BindAction(Pair.Key, ETriggerEvent::Started, this, &ACPlayerController::OnAbilityInput, Pair.Value);
+			}
+		}
 	}
 }
 
 void ACPlayerController::OnMove(const FInputActionValue & Value)
 {
+	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn())) {
+		if (ASC->HasMatchingGameplayTag(CTags::Lock_Move)) {
+			return;
+		}
+	}
+
+
 	FHitResult Hit;
 	// Cursor 채널
 	if (GetHitResultUnderCursor(ECC_Cursor, false, Hit) == false)
@@ -64,4 +92,22 @@ void ACPlayerController::OnMove(const FInputActionValue & Value)
 	}
 
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, Destination);
+}
+
+void ACPlayerController::OnAbilityInput(FGameplayTag InputTag)
+{
+	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn());
+	if (!IsValid(ASC)) return;
+
+	TArray<FGameplayAbilitySpecHandle> Handles;
+	for (const FGameplayAbilitySpec& Spec : ASC->GetActivatableAbilities()) {
+		const UCGameplayAbility* Ability = Cast<UCGameplayAbility>(Spec.Ability);
+		if (Ability && Ability->GetInputTag().MatchesTagExact(InputTag)) {
+			Handles.Add(Spec.Handle);
+		}
+	}
+
+	for (const FGameplayAbilitySpecHandle& Handle : Handles) {
+		ASC->TryActivateAbility(Handle);
+	}
 }
