@@ -18,6 +18,17 @@ ACPlayerController::ACPlayerController()
 	bShowMouseCursor = true;
 }
 
+bool ACPlayerController::GetAimLocation(FVector& OutLocation) const
+{
+	FHitResult Hit;
+	if (!GetHitResultUnderCursor(ECC_Cursor, false, Hit)) {
+		return false;
+	}
+
+	OutLocation = Hit.Location;
+	return true;
+}
+
 void ACPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

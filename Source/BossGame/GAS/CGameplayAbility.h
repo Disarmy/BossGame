@@ -26,6 +26,9 @@ protected:
 	UFUNCTION(BlueprintPure, Category = "Ability")
 	ACUnit* GetUnit() const;
 
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+	void FaceAim();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	FGameplayTag InputTag;

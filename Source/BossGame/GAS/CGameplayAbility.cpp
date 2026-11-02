@@ -3,6 +3,7 @@
 
 #include "GAS/CGameplayAbility.h"
 #include "CUnit.h"
+#include "CPlayerController.h"
 #include "GameFramework/Controller.h"
 
 UCGameplayAbility::UCGameplayAbility()
@@ -26,4 +27,25 @@ void UCGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 ACUnit* UCGameplayAbility::GetUnit() const
 {
 	return Cast<ACUnit>(GetAvatarActorFromActorInfo());
+}
+
+void UCGameplayAbility::FaceAim()
+{
+	ACUnit* Unit = GetUnit();
+	if (Unit == nullptr)
+		return;
+
+	const ACPlayerController* PC = Cast<ACPlayerController>(GetCurrentActorInfo()->PlayerController.Get());
+	if (PC == nullptr)
+		return;
+
+	FVector AimLocation;
+	if (PC->GetAimLocation(AimLocation) == false)
+		return;
+
+	FVector Direction = AimLocation - Unit->GetActorLocation();
+	Direction.Z = 0.f;
+
+	if (Direction.IsNearlyZero() == false)
+		Unit->SetActorRotation(Direction.Rotation());
 }

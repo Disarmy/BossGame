@@ -19,6 +19,8 @@ class BOSSGAME_API ACPlayerController : public APlayerController
 public:
 	ACPlayerController();
 
+	bool GetAimLocation(FVector& OutLocation) const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
