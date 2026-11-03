@@ -11,9 +11,12 @@ namespace CTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Dead, "State.Dead", "사망");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Invincible, "State.Invincible", "무적");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_CanCombo, "State.CanCombo", "콤보 선입력 구간");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_CanCancel, "State.CanCancel", "후딜 캔슬 구간");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Hit, "Event.Hit", "피격이벤트");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Combo_Check, "Event.Combo.Check", "콤보 판정 지점");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Lock_Move, "Lock.Move", "이동 차단");
+
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Attack, "Ability.Attack", "기본 공격 Ability");
 }

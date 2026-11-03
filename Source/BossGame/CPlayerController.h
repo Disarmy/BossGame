@@ -27,6 +27,7 @@ protected:
 
 private:
 	void OnMove(const FInputActionValue& Value);
+	void OnMoveStarted(const FInputActionValue& Value);
 	void OnAbilityInput(FGameplayTag InputTag);
 
 protected:

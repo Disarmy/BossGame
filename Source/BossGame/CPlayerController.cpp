@@ -47,6 +47,7 @@ void ACPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent)) {
+		Input->BindAction(MoveAction, ETriggerEvent::Started, this, &ACPlayerController::OnMoveStarted);
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACPlayerController::OnMove);
 		
 		for (const TPair<TObjectPtr<UInputAction>, FGameplayTag>& Pair : AbilityInputs) {
@@ -92,6 +93,15 @@ void ACPlayerController::OnMove(const FInputActionValue & Value)
 	}
 
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, Destination);
+}
+
+void ACPlayerController::OnMoveStarted(const FInputActionValue& Value)
+{
+	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn());
+	if (ASC && ASC->HasMatchingGameplayTag(CTags::Lock_Move) && ASC->HasMatchingGameplayTag(CTags::State_CanCancel)) {
+		FGameplayTagContainer CancelTags(CTags::Ability_Attack);
+		ASC->CancelAbilities(&CancelTags);
+	}
 }
 
 void ACPlayerController::OnAbilityInput(FGameplayTag InputTag)

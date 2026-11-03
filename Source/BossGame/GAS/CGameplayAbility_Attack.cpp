@@ -24,6 +24,7 @@ void UCGameplayAbility_Attack::ActivateAbility(const FGameplayAbilitySpecHandle 
 
 	ComboIndex = 0;
 	bComboInput = false;
+	MontageTask = nullptr;
 	FaceAim();
 
 	// 공격 중 들어오는 입력 (컨트롤러가 보낸 Input.Attack 이벤트)
@@ -40,6 +41,18 @@ void UCGameplayAbility_Attack::ActivateAbility(const FGameplayAbilitySpecHandle 
 
 	// Attack1 재생
 	PlaySection(0);
+}
+
+void UCGameplayAbility_Attack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	// 몽타주가 중간에 끊겨도 구간 태그가 남지 않게
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo()) {
+		ASC->SetLooseGameplayTagCount(CTags::State_CanCombo, 0);
+		ASC->SetLooseGameplayTagCount(CTags::State_CanCancel, 0);
+	}
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UCGameplayAbility_Attack::OnComboInput(FGameplayEventData EventData)
@@ -59,7 +72,6 @@ void UCGameplayAbility_Attack::OnComboCheck(FGameplayEventData EventData)
 
 	ComboIndex++;
 	bComboInput = false;
-	MontageTask = nullptr;
 
 	FaceAim();
 	PlaySection(ComboIndex);
