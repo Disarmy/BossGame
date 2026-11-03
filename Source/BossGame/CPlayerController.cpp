@@ -100,11 +100,27 @@ void ACPlayerController::OnAbilityInput(FGameplayTag InputTag)
 	if (!IsValid(ASC)) return;
 
 	TArray<FGameplayAbilitySpecHandle> Handles;
+	bool bActiveFound = false;
+
 	for (const FGameplayAbilitySpec& Spec : ASC->GetActivatableAbilities()) {
 		const UCGameplayAbility* Ability = Cast<UCGameplayAbility>(Spec.Ability);
-		if (Ability && Ability->GetInputTag().MatchesTagExact(InputTag)) {
+
+		if (!Ability || !Ability->GetInputTag().MatchesTagExact(InputTag)) {
+			continue;
+		}
+
+		if (Spec.IsActive()) {
+			bActiveFound = true;
+		}
+		else {
 			Handles.Add(Spec.Handle);
 		}
+	}
+
+	if (bActiveFound) {
+		FGameplayEventData EventData;
+		EventData.EventTag = InputTag;
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetPawn(), InputTag, EventData);
 	}
 
 	for (const FGameplayAbilitySpecHandle& Handle : Handles) {

@@ -1,0 +1,94 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "GAS/CGameplayAbility_Attack.h"
+#include "GAS/CGameplayTags.h"
+#include "AbilitySystemComponent.h"
+#include "Animation/AnimInstance.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+
+UCGameplayAbility_Attack::UCGameplayAbility_Attack()
+{
+	bStopMovementOnActivate = true;
+}
+
+void UCGameplayAbility_Attack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo * ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData * TriggerEventData)
+{
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	if (!AttackMontage || ComboSections.IsEmpty()) {
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+
+	ComboIndex = 0;
+	bComboInput = false;
+	FaceAim();
+
+	// 공격 중 들어오는 입력 (컨트롤러가 보낸 Input.Attack 이벤트)
+	UAbilityTask_WaitGameplayEvent* WaitInput = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+		this, CTags::Input_Attack, nullptr, false, true);
+	WaitInput->EventReceived.AddDynamic(this, &UCGameplayAbility_Attack::OnComboInput);
+	WaitInput->ReadyForActivation();
+
+	// 몽타주의 콤보 판정 지점 (노티파이가 보낸 Event.Combo.Check)
+	UAbilityTask_WaitGameplayEvent* WaitCheck = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+		this, CTags::Event_Combo_Check, nullptr, false, true);
+	WaitCheck->EventReceived.AddDynamic(this, &UCGameplayAbility_Attack::OnComboCheck);
+	WaitCheck->ReadyForActivation();
+
+	// Attack1 재생
+	PlaySection(0);
+}
+
+void UCGameplayAbility_Attack::OnComboInput(FGameplayEventData EventData)
+{
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
+	if (ASC && ASC->HasMatchingGameplayTag(CTags::State_CanCombo)) {
+		bComboInput = true;
+	}
+}
+
+void UCGameplayAbility_Attack::OnComboCheck(FGameplayEventData EventData)
+{
+	// 콤보가 아니거나 콤보 수가 가지고 있는 수 보다 많아지면
+	if (!bComboInput || ComboIndex + 1 >= ComboSections.Num()) {
+		return;
+	}
+
+	ComboIndex++;
+	bComboInput = false;
+	MontageTask = nullptr;
+
+	FaceAim();
+	PlaySection(ComboIndex);
+}
+
+void UCGameplayAbility_Attack::OnMontageEnded()
+{
+	// 콤보 전환 시 이전 재생이 밀려나며 오는 신호는 무시 (새 재생이 이미 진행 중)
+	if (UAnimInstance* AnimInstance = GetActorInfo().GetAnimInstance()) {
+		if (AnimInstance->Montage_IsPlaying(AttackMontage))
+			return;
+	}
+
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+}
+
+void UCGameplayAbility_Attack::PlaySection(int32 Index)
+{
+	if (MontageTask) {
+		MontageTask->OnCompleted.RemoveAll(this);
+		MontageTask->OnInterrupted.RemoveAll(this);
+		MontageTask->OnCancelled.RemoveAll(this);
+		MontageTask->EndTask();
+	}
+
+	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
+		this, NAME_None, AttackMontage, 1.f, ComboSections[Index]);
+	MontageTask->OnCompleted.AddDynamic(this, &UCGameplayAbility_Attack::OnMontageEnded);
+	MontageTask->OnInterrupted.AddDynamic(this, &UCGameplayAbility_Attack::OnMontageEnded);
+	MontageTask->OnCancelled.AddDynamic(this, &UCGameplayAbility_Attack::OnMontageEnded);
+	MontageTask->ReadyForActivation();
+}
