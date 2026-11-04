@@ -19,4 +19,5 @@ namespace CTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Lock_Move, "Lock.Move", "이동 차단");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Attack, "Ability.Attack", "기본 공격 Ability");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Dodge, "Ability.Dodge", "회피 Ability");
 }

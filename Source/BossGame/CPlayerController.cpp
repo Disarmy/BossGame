@@ -98,10 +98,8 @@ void ACPlayerController::OnMove(const FInputActionValue & Value)
 void ACPlayerController::OnMoveStarted(const FInputActionValue& Value)
 {
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn());
-	if (ASC && ASC->HasMatchingGameplayTag(CTags::Lock_Move) && ASC->HasMatchingGameplayTag(CTags::State_CanCancel)) {
-		FGameplayTagContainer CancelTags(CTags::Ability_Attack);
-		ASC->CancelAbilities(&CancelTags);
-	}
+	if (ASC && ASC->HasMatchingGameplayTag(CTags::Lock_Move))
+		TryCancelCurAction(ASC);
 }
 
 void ACPlayerController::OnAbilityInput(FGameplayTag InputTag)
@@ -122,7 +120,8 @@ void ACPlayerController::OnAbilityInput(FGameplayTag InputTag)
 		if (Spec.IsActive()) {
 			bActiveFound = true;
 		}
-		else {
+		else if (Ability->CheckCooldown(Spec.Handle, ASC->AbilityActorInfo.Get())) {
+			// 쿨타임이 끝난 것만 발동 후보로 (쿨타임 중이면 캔슬도 하지 않음)
 			Handles.Add(Spec.Handle);
 		}
 	}
@@ -133,7 +132,24 @@ void ACPlayerController::OnAbilityInput(FGameplayTag InputTag)
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetPawn(), InputTag, EventData);
 	}
 
+	if (!Handles.IsEmpty())
+		TryCancelCurAction(ASC);
+
 	for (const FGameplayAbilitySpecHandle& Handle : Handles) {
 		ASC->TryActivateAbility(Handle);
 	}
+}
+
+bool ACPlayerController::TryCancelCurAction(UAbilitySystemComponent* ASC)
+{
+	if (!ASC || !ASC->HasMatchingGameplayTag(CTags::State_CanCancel))
+		return false;
+
+	// 캔슬 구간을 여는 동작들. 스킬이 생기면 Ability.Skill 추가
+	FGameplayTagContainer CancelTags;
+	CancelTags.AddTag(CTags::Ability_Attack);
+	CancelTags.AddTag(CTags::Ability_Dodge);
+
+	ASC->CancelAbilities(&CancelTags);
+	return true;
 }
