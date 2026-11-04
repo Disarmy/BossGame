@@ -4,6 +4,7 @@
 #include "GAS/CGameplayAbility_Attack.h"
 #include "GAS/CGameplayTags.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Animation/AnimInstance.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
@@ -38,6 +39,12 @@ void UCGameplayAbility_Attack::ActivateAbility(const FGameplayAbilitySpecHandle 
 		this, CTags::Event_Combo_Check, nullptr, false, true);
 	WaitCheck->EventReceived.AddDynamic(this, &UCGameplayAbility_Attack::OnComboCheck);
 	WaitCheck->ReadyForActivation();
+
+	// 무기 적중 (ANSC_WeaponTrace 구간 동안 무기가 보냄)
+	UAbilityTask_WaitGameplayEvent* WaitHit = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+		this, CTags::Event_Attack_Hit, nullptr, false, true);
+	WaitHit->EventReceived.AddDynamic(this, &UCGameplayAbility_Attack::OnAttackHit);
+	WaitHit->ReadyForActivation();
 
 	// Attack1 재생
 	PlaySection(0);
@@ -86,6 +93,21 @@ void UCGameplayAbility_Attack::OnMontageEnded()
 	}
 
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+}
+
+void UCGameplayAbility_Attack::OnAttackHit(FGameplayEventData EventData)
+{
+	AActor* Target = const_cast<AActor*>(EventData.Target.Get());
+	if (!Target || !DamageEffect)
+		return;
+
+	const float Damage = ComboDamages.IsValidIndex(ComboIndex) ? ComboDamages[ComboIndex] : 0.f;
+
+	FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel());
+	Spec.Data->SetSetByCallerMagnitude(CTags::Data_Damage, Damage);
+
+	ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, Spec,
+		UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Target));
 }
 
 void UCGameplayAbility_Attack::PlaySection(int32 Index)

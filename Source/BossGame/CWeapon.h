@@ -16,6 +16,13 @@ public:
 	ACWeapon();
 	
 	void AttachWeapon(ACharacter* Owner);
+
+	void BeginTrace();
+	void EndTrace();
+
+protected:
+	virtual void Tick(float DeltaTime) override;
+
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> Mesh;
@@ -23,4 +30,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName AttachSocketName = TEXT("WeaponSocket");
 
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	TObjectPtr<USceneComponent> TraceStart;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	TObjectPtr<USceneComponent> TraceEnd;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Trace")
+	float TraceRadius = 20.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Trace")
+	bool bDrawDebug = false;
+
+private:
+	UPROPERTY()
+	TArray<TObjectPtr<AActor>> HitActors;
 };

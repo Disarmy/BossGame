@@ -38,6 +38,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void DropWeapon();
 
+	FORCEINLINE ACWeapon* GetWeapon() const { return Weapon; }
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;

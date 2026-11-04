@@ -19,6 +19,7 @@ namespace CTags
 	// Event
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Hit);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Combo_Check);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Attack_Hit);
 
 	// Lock
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Lock_Move);
@@ -26,4 +27,7 @@ namespace CTags
 	// Ability
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Attack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Dodge);
+
+	// Data
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_Damage);
 }
