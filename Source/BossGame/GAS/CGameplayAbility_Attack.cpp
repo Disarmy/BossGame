@@ -105,6 +105,9 @@ void UCGameplayAbility_Attack::OnAttackHit(FGameplayEventData EventData)
 
 	FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel());
 	Spec.Data->SetSetByCallerMagnitude(CTags::Data_Damage, Damage);
+	if (HitReactTag.IsValid()) {
+		Spec.Data->AddDynamicAssetTag(HitReactTag);
+	}
 
 	ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, Spec,
 		UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Target));

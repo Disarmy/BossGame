@@ -149,6 +149,7 @@ bool ACPlayerController::TryCancelCurAction(UAbilitySystemComponent* ASC)
 	FGameplayTagContainer CancelTags;
 	CancelTags.AddTag(CTags::Ability_Attack);
 	CancelTags.AddTag(CTags::Ability_Dodge);
+	CancelTags.AddTag(CTags::Ability_Down);
 
 	ASC->CancelAbilities(&CancelTags);
 	return true;

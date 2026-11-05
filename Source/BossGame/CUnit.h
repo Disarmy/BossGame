@@ -13,7 +13,7 @@ class UAbilitySystemComponent;
 class UCAttributeSet;
 class UGameplayAbility;
 class UGameplayEffect;
-
+class UAnimMontage;
 
 UCLASS()
 class BOSSGAME_API ACUnit : public ACharacter, public IAbilitySystemInterface
@@ -40,6 +40,12 @@ public:
 
 	FORCEINLINE ACWeapon* GetWeapon() const { return Weapon; }
 
+	UFUNCTION(BlueprintPure, Category = "Animation")
+	UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
+
+	UFUNCTION(BlueprintPure, Category = "Animation")
+	UAnimMontage* GetDownMontage() const { return DownMontage; }
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -58,6 +64,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ACWeapon> WeaponClass;
+	 
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TObjectPtr<UAnimMontage> HitReactMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TObjectPtr<UAnimMontage> DownMontage;
 
 private:
 	UPROPERTY()

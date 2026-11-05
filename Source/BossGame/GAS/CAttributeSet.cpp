@@ -26,14 +26,19 @@ void UCAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 		if (LocalDamage > 0.f) {
 			SetHP(FMath::Clamp(GetHP() - LocalDamage, 0.f, GetMaxHP()));
 
-			// 피격 이벤트 (피격 반응 Ability가 받음)
+			// 피격 이벤트: 세부 태그를 보내면 부모 Event.Hit 트리거도 같이 발동
+			const FGameplayTagContainer& SpecTags = Data.EffectSpec.GetDynamicAssetTags();
+			FGameplayTag HitTag = CTags::Event_Hit;
+			if (SpecTags.HasTagExact(CTags::Data_HitReact_Down))
+				HitTag = CTags::Event_Hit_Down;
+			else if (SpecTags.HasTagExact(CTags::Data_HitReact_Flinch))
+				HitTag = CTags::Event_Hit_Flinch;
+
 			FGameplayEventData EventData;
-			EventData.EventTag = CTags::Event_Hit;
+			EventData.EventTag = HitTag;
 			EventData.Instigator = Data.EffectSpec.GetContext().GetInstigator();
 			EventData.EventMagnitude = LocalDamage;
-			UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetOwningActor(), CTags::Event_Hit, EventData);
-
-			// HP 0 → 사망 처리 (다음 단계)
+			UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetOwningActor(), HitTag, EventData);
 		}
 	}
 	else if (Data.EvaluatedData.Attribute == GetHPAttribute()) {

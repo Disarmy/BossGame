@@ -54,6 +54,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TArray<float> ComboDamages;
 
+	// 맞은 대상의 반응 (비우면 데미지만, 일반 몬스터 공격)
+	UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (Categories = "Data.HitReact"))
+	FGameplayTag HitReactTag;
+
 private:
 	// 실행 중 상태 (ActivateAbility에서 매번 초기화)
 	int32 ComboIndex = 0;
