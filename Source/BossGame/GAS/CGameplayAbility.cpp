@@ -2,6 +2,7 @@
 
 
 #include "GAS/CGameplayAbility.h"
+#include "GAS/CGameplayTags.h"
 #include "CUnit.h"
 #include "CPlayerController.h"
 #include "GameFramework/Controller.h"
@@ -9,6 +10,9 @@
 UCGameplayAbility::UCGameplayAbility()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+
+	// 죽으면 어떤 Ability도 발동하지 않음
+	ActivationBlockedTags.AddTag(CTags::State_Dead);
 }
 
 void UCGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)

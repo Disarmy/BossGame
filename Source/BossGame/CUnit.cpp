@@ -6,6 +6,9 @@
 #include "CWeapon.h"
 #include "GAS/CAttributeSet.h"
 #include "AbilitySystemComponent.h"
+#include "GAS/CGameplayTags.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ACUnit::ACUnit()
@@ -21,6 +24,26 @@ ACUnit::ACUnit()
 UAbilitySystemComponent* ACUnit::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+void ACUnit::Die(AActor* Killer)
+{
+	// 이미 사망
+	if (IsDead()) return;
+
+	AbilitySystemComponent->AddLooseGameplayTag(CTags::State_Dead);
+	AbilitySystemComponent->CancelAllAbilities();
+
+	if (AController* UnitController = GetController())
+		UnitController->StopMovement();
+
+	GetCharacterMovement()->DisableMovement();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
+
+	if (DeathMontage)
+		PlayAnimMontage(DeathMontage);
+
+	ReceiveDie(Killer);
 }
 
 // Called when the game starts or when spawned
@@ -64,6 +87,11 @@ void ACUnit::DropWeapon()
 		Weapon->Destroy();
 
 	Weapon = nullptr;
+}
+
+bool ACUnit::IsDead() const
+{
+	return AbilitySystemComponent && AbilitySystemComponent->HasMatchingGameplayTag(CTags::State_Dead);
 }
 
 void ACUnit::InitAbilitySystem()

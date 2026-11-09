@@ -9,6 +9,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+class UAbilitySystemComponent;
 struct FInputActionValue;
 
 UCLASS()
@@ -27,7 +28,9 @@ protected:
 
 private:
 	void OnMove(const FInputActionValue& Value);
+	void OnMoveStarted(const FInputActionValue& Value);
 	void OnAbilityInput(FGameplayTag InputTag);
+	bool TryCancelCurAction(UAbilitySystemComponent* ASC);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")

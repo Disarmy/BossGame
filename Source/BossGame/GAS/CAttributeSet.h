@@ -30,5 +30,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData MaxHP;
 	ATTRIBUTE_ACCESSORS(UCAttributeSet, MaxHP)
+
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData Damage;
+	ATTRIBUTE_ACCESSORS(UCAttributeSet, Damage)
 	
 };
