@@ -23,7 +23,7 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 
 public:
-	// ½½·Ô¿¡ ½ºÅ³ ÀåÂø (±âÁ¸ ½ºÅ³Àº ÇØÁ¦). ÄğÅ¸ÀÓÀº ½ºÅ³ ÀÌ¸§ ±âÁØ ÅÂ±×¶ó ¹Ù²ã ²¸µµ À¯ÁöµÊ
+	// ìŠ¬ë¡¯ì— ìŠ¤í‚¬ ì¥ì°© (ê¸°ì¡´ ìŠ¤í‚¬ì€ í•´ì œ). ì¿¨íƒ€ì„ì€ ìŠ¤í‚¬ ì´ë¦„ ê¸°ì¤€ íƒœê·¸ë¼ ë°”ê¿” ê»´ë„ ìœ ì§€ë¨
 	UFUNCTION(BlueprintCallable, Category = "Ability")
 	void EquipSkill(FGameplayTag SlotTag, TSubclassOf<UCGameplayAbility> SkillClass);
 
@@ -34,7 +34,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCameraComponent> Camera;
 
-	// ½ºÅ³ ¸ñ·Ï (Input.Skill.SlotN ¡æ ½ºÅ³ GA)
+	// ìŠ¤í‚¬ ëª©ë¡ (Input.Skill.SlotN â†’ ìŠ¤í‚¬ GA)
 	UPROPERTY(EditDefaultsOnly, Category = "Ability", meta = (Categories = "Input.Skill"))
 	TMap<FGameplayTag, TSubclassOf<UCGameplayAbility>> DefaultSkills;
 

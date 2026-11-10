@@ -33,9 +33,9 @@ ACPlayer::ACPlayer()
 
 void ACPlayer::PossessedBy(AController* NewController)
 {
-	Super::PossessedBy(NewController);   // ¿©±â¼­ ASC ÃÊ±âÈ­, ±âº» Ability ºÎ¿© CUnit
+	Super::PossessedBy(NewController);   // ì—¬ê¸°ì„œ ASC ì´ˆê¸°í™”, ê¸°ë³¸ Ability ë¶€ì—¬ CUnit
 
-	if (bSkillsGiven) return; // ÇÑ¹ø¸¸
+	if (bSkillsGiven) return; // í•œë²ˆë§Œ
 	bSkillsGiven = true;
 
 	for (const TPair<FGameplayTag, TSubclassOf<UCGameplayAbility>>& Pair : DefaultSkills)
@@ -46,7 +46,7 @@ void ACPlayer::EquipSkill(FGameplayTag SlotTag, TSubclassOf<UCGameplayAbility> S
 {
 	if (!AbilitySystemComponent || !SlotTag.IsValid()) return;
 
-	// ½½·Ô¿¡ ÀÖ´ø ½ºÅ³ Ã£±â
+	// ìŠ¬ë¡¯ì— ìžˆë˜ ìŠ¤í‚¬ ì°¾ê¸°
 	FGameplayAbilitySpecHandle OldHandle;
 	for (const FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities()) {
 		if (Spec.GetDynamicSpecSourceTags().HasTagExact(SlotTag)) {
@@ -55,7 +55,7 @@ void ACPlayer::EquipSkill(FGameplayTag SlotTag, TSubclassOf<UCGameplayAbility> S
 		}
 	}
 
-	// ¼øÈ¸°¡ ³¡³­ µÚ ÇØÁ¦
+	// ìˆœíšŒê°€ ëë‚œ ë’¤ í•´ì œ
 	if (OldHandle.IsValid())
 		AbilitySystemComponent->ClearAbility(OldHandle);
 

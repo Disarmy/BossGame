@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GAS/CGameplayAbility.h"
 #include "GAS/CGameplayTags.h"
-#include "CUnit.h"
 #include "CPlayerController.h"
+#include "CUnit.h"
 #include "GameFramework/Controller.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 UCGameplayAbility::UCGameplayAbility()
 {
@@ -26,6 +26,19 @@ void UCGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	}
 
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+}
+
+void UCGameplayAbility::ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const
+{
+	if (!Target || !Effect) return;
+
+	FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(Effect, GetAbilityLevel());
+	Spec.Data->SetSetByCallerMagnitude(CTags::Data_Damage, Damage);
+	if (HitReactTag.IsValid())
+		Spec.Data->AddDynamicAssetTag(HitReactTag);
+
+	ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, Spec,
+		UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Target));
 }
 
 ACUnit* UCGameplayAbility::GetUnit() const

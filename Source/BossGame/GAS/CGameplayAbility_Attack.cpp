@@ -4,7 +4,6 @@
 #include "GAS/CGameplayAbility_Attack.h"
 #include "GAS/CGameplayTags.h"
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemBlueprintLibrary.h"
 #include "Animation/AnimInstance.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
@@ -98,19 +97,9 @@ void UCGameplayAbility_Attack::OnMontageEnded()
 void UCGameplayAbility_Attack::OnAttackHit(FGameplayEventData EventData)
 {
 	AActor* Target = const_cast<AActor*>(EventData.Target.Get());
-	if (!Target || !DamageEffect)
-		return;
-
 	const float Damage = ComboDamages.IsValidIndex(ComboIndex) ? ComboDamages[ComboIndex] : 0.f;
 
-	FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel());
-	Spec.Data->SetSetByCallerMagnitude(CTags::Data_Damage, Damage);
-	if (HitReactTag.IsValid()) {
-		Spec.Data->AddDynamicAssetTag(HitReactTag);
-	}
-
-	ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, Spec,
-		UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Target));
+	ApplyDamageEffect(Target, DamageEffect, Damage, HitReactTag);
 }
 
 void UCGameplayAbility_Attack::PlaySection(int32 Index)

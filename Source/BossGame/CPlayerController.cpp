@@ -145,11 +145,12 @@ bool ACPlayerController::TryCancelCurAction(UAbilitySystemComponent* ASC)
 	if (!ASC || !ASC->HasMatchingGameplayTag(CTags::State_CanCancel))
 		return false;
 
-	// 캔슬 구간을 여는 동작들. 스킬이 생기면 Ability.Skill 추가
+	// 캔슬 구간을 여는 동작들
 	FGameplayTagContainer CancelTags;
 	CancelTags.AddTag(CTags::Ability_Attack);
 	CancelTags.AddTag(CTags::Ability_Dodge);
 	CancelTags.AddTag(CTags::Ability_Down);
+	CancelTags.AddTag(CTags::Ability_Skill);
 
 	ASC->CancelAbilities(&CancelTags);
 	return true;
