@@ -113,7 +113,7 @@ void ACPlayerController::OnAbilityInput(FGameplayTag InputTag)
 	for (const FGameplayAbilitySpec& Spec : ASC->GetActivatableAbilities()) {
 		const UCGameplayAbility* Ability = Cast<UCGameplayAbility>(Spec.Ability);
 
-		if (!Ability || !Ability->GetInputTag().MatchesTagExact(InputTag)) {
+		if (!Ability || !Spec.GetDynamicSpecSourceTags().HasTagExact(InputTag)) {
 			continue;
 		}
 
