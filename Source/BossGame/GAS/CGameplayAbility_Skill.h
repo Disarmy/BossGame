@@ -39,19 +39,25 @@ private:
 	UFUNCTION()
 	void OnSkillHit(FGameplayEventData EventData);
 
+	UFUNCTION()
+	void OnSkillHitBegin(FGameplayEventData EventData);
+
+	UFUNCTION()
+	void OnSkillHitEnd(FGameplayEventData EventData);
+
 protected:
 	// 스킬 이름 쿨타임 태그 (예: Cooldown.Skill.SlideAttack). 슬롯과 무관
 	UPROPERTY(EditDefaultsOnly, Category = "Cooldown", meta = (Categories = "Cooldown.Skill"))
 	FGameplayTagContainer CooldownTags;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Cooldown")
-	float CooldownDuration = 5.f;
+	float CooldownDuration = 5.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TSubclassOf<UGameplayEffect> DamageEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	float Damage = 0.f;
+	float Damage = 0.0f;
 
 	// 맞은 대상의 반응 (비우면 데미지만)
 	UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (Categories = "Data.HitReact"))
@@ -59,19 +65,23 @@ protected:
 
 	// 판정 범위: 캐릭터 앞쪽으로 Offset만큼 옮긴 지점 기준
 	UPROPERTY(EditDefaultsOnly, Category = "Hit")
-	float HitRadius = 200.f;
+	float HitRadius = 200.0f;
 
 	// 0이면 원, 크면 도넛 (안쪽은 안 맞음)
 	UPROPERTY(EditDefaultsOnly, Category = "Hit")
-	float HitInnerRadius = 0.f;
+	float HitInnerRadius = 0.0f;
 
 	// 360이면 원, 작으면 정면 부채꼴
 	UPROPERTY(EditDefaultsOnly, Category = "Hit", meta = (ClampMin = "0", ClampMax = "360"))
-	float HitAngle = 360.f;
+	float HitAngle = 360.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hit")
-	float HitForwardOffset = 0.f;
+	float HitForwardOffset = 0.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hit")
 	bool bDrawDebugHit = false;
+
+private:
+	bool bInSkillHit = false;
+	TSet<TWeakObjectPtr<AActor>> SkillHitActors;
 };

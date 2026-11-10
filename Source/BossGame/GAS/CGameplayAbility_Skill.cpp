@@ -49,6 +49,19 @@ void UCGameplayAbility_Skill::ActivateAbility(const FGameplayAbilitySpecHandle H
 	WaitHit->EventReceived.AddDynamic(this, &UCGameplayAbility_Skill::OnSkillHit);
 	WaitHit->ReadyForActivation();
 
+	bInSkillHit = false;
+	SkillHitActors.Reset();
+
+	UAbilityTask_WaitGameplayEvent* WaitHitBegin = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+		this, CTags::Event_Skill_HitBegin, nullptr, false, true);
+	WaitHitBegin->EventReceived.AddDynamic(this, &UCGameplayAbility_Skill::OnSkillHitBegin);
+	WaitHitBegin->ReadyForActivation();
+
+	UAbilityTask_WaitGameplayEvent* WaitHitEnd = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+		this, CTags::Event_Skill_HitEnd, nullptr, false, true);
+	WaitHitEnd->EventReceived.AddDynamic(this, &UCGameplayAbility_Skill::OnSkillHitEnd);
+	WaitHitEnd->ReadyForActivation();
+
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);   // 이동 정지 + BP 그래프
 }
 
@@ -65,7 +78,7 @@ void UCGameplayAbility_Skill::EndAbility(const FGameplayAbilitySpecHandle Handle
 bool UCGameplayAbility_Skill::IsInHitArea(const FVector& Center, const FVector& Forward, const FVector& Point, float TargetRadius) const
 {
 	FVector ToPoint = Point - Center;
-	ToPoint.Z = 0.f;
+	ToPoint.Z = 0.0f;
 	const float Dist = ToPoint.Size();
 
 	// 거리: 대상 캡슐이 바깥 원에 걸치면 맞음, 안쪽 원에 완전히 들어가 있으면 안 맞음
@@ -73,7 +86,7 @@ bool UCGameplayAbility_Skill::IsInHitArea(const FVector& Center, const FVector& 
 	if (Dist + TargetRadius < HitInnerRadius) return false;
 
 	// 각도: 360이면 원, 대상이 중심에 겹쳐 있으면 맞음
-	if (HitAngle >= 360.f || Dist <= KINDA_SMALL_NUMBER) return true;
+	if (HitAngle >= 360.0f || Dist <= KINDA_SMALL_NUMBER) return true;
 
 	const float CosHalf = FMath::Cos(FMath::DegreesToRadians(HitAngle * 0.5f));
 	return FVector::DotProduct(Forward, ToPoint / Dist) >= CosHalf;
@@ -103,27 +116,43 @@ void UCGameplayAbility_Skill::OnSkillHit(FGameplayEventData EventData)
 	for (const FOverlapResult& Overlap : Overlaps) {
 		AActor* Target = Overlap.GetActor();
 		if (!Target || HitActors.Contains(Target)) continue;
+		if (bInSkillHit && SkillHitActors.Contains(Target)) continue;
 
 		if (!IsInHitArea(Center, Forward, Target->GetActorLocation(), Target->GetSimpleCollisionRadius()))
 			continue;
 
 		HitActors.Add(Target);
+		if (bInSkillHit)
+			SkillHitActors.Add(Target);
+
 		ApplySkillDamage(Target);
 	}
 
 	// Debug
 #if ENABLE_DRAW_DEBUG
 	if (bDrawDebugHit) {
+		const float LifeTime = bInSkillHit ? -1.0f : 1.0f;
 		const FColor Color = HitActors.IsEmpty() ? FColor::Green : FColor::Red;
-		DrawDebugCircle(World, Center, HitRadius, 32, Color, false, 1.f, 0, 2.f, FVector::ForwardVector, FVector::RightVector, false);
-		if (HitInnerRadius > 0.f)
-			DrawDebugCircle(World, Center, HitInnerRadius, 32, Color, false, 1.f, 0, 2.f, FVector::ForwardVector, FVector::RightVector, false);
-		if (HitAngle < 360.f) {
-			for (const float Sign : { -1.f, 1.f }) {
+		DrawDebugCircle(World, Center, HitRadius, 32, Color, false, LifeTime, 0, 2.0f, FVector::ForwardVector, FVector::RightVector, false);
+		if (HitInnerRadius > 0.0f)
+			DrawDebugCircle(World, Center, HitInnerRadius, 32, Color, false, LifeTime, 0, 2.0f, FVector::ForwardVector, FVector::RightVector, false);
+		if (HitAngle < 360.0f) {
+			for (const float Sign : { -1.0f, 1.0f }) {
 				const FVector Edge = Forward.RotateAngleAxis(Sign * HitAngle * 0.5f, FVector::UpVector);
-				DrawDebugLine(World, Center, Center + Edge * HitRadius, Color, false, 1.f, 0, 2.f);
+				DrawDebugLine(World, Center, Center + Edge * HitRadius, Color, false, LifeTime, 0, 2.0f);
 			}
 		}
 	}
 #endif
+}
+
+void UCGameplayAbility_Skill::OnSkillHitBegin(FGameplayEventData EventData)
+{
+	bInSkillHit = true;
+	SkillHitActors.Reset();
+}
+
+void UCGameplayAbility_Skill::OnSkillHitEnd(FGameplayEventData EventData)
+{
+	bInSkillHit = false;
 }

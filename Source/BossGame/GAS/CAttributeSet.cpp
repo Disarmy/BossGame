@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CUnit.h"
 #include "CAttributeSet.h"
+#include "CUnit.h"
 #include "GameplayEffectExtension.h"
 #include "GAS/CGameplayTags.h"
 #include "AbilitySystemBlueprintLibrary.h"

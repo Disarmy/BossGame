@@ -19,6 +19,8 @@ namespace CTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Combo_Check, "Event.Combo.Check", "콤보 판정 지점");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Attack_Hit, "Event.Attack.Hit", "공격 판정");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Skill_Hit, "Event.Skill.Hit", "스킬 범위 판정 시점");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Skill_HitBegin, "Event.Skill.HitBegin", "스킬 판정 구간 시작");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Skill_HitEnd, "Event.Skill.HitEnd", "스킬 판정 구간 끝");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Lock_Move, "Lock.Move", "이동 차단");
 
