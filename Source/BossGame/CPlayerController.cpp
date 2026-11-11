@@ -83,7 +83,7 @@ void ACPlayerController::OnMove(const FInputActionValue & Value)
 		const FVector Direction = (Unit->GetActorLocation() - TargetLocation).GetSafeNormal2D();
 
 		const float Gap = Target->GetCapsuleComponent()->GetScaledCapsuleRadius()
-			+ Cast<ACharacter>(Unit)->GetCapsuleComponent()->GetScaledCapsuleRadius()
+			+ Unit->GetCapsuleComponent()->GetScaledCapsuleRadius()
 			+ StopDistance;
 
 		Destination = TargetLocation + Direction * Gap;

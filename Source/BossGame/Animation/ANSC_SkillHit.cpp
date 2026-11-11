@@ -1,5 +1,6 @@
 #include "Animation/ANSC_SkillHit.h"
 #include "GAS/CGameplayTags.h"
+#include "AbilitySystemGlobals.h"
 #include "AbilitySystemBlueprintLibrary.h"
 
 void UANSC_SkillHit::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration,
