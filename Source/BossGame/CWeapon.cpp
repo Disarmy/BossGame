@@ -1,12 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CWeapon.h"
-#include "GameFramework/Character.h"
-#include "Components/SkeletalMeshComponent.h"
+#include "BossGame.h"
 #include "GAS/CGameplayTags.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "GameFramework/Character.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 ACWeapon::ACWeapon()
@@ -67,8 +65,8 @@ void ACWeapon::Tick(float DeltaTime)
 	GetWorld()->SweepMultiByObjectType(Hits, Start, End, FQuat::Identity,
 		FCollisionObjectQueryParams(ECC_Pawn), FCollisionShape::MakeSphere(TraceRadius), Params);
 
-	if (bDrawDebug)
-		DrawDebugLine(GetWorld(), Start, End, Hits.IsEmpty() ? FColor::Green : FColor::Red, false, 0.5f, 0, 2.f);
+	if (CDebug::bDrawHit)
+		DrawDebugLine(GetWorld(), Start, End, Hits.IsEmpty() ? FColor::Green : FColor::Red, false, 0.5f, 0, 2.0f);
 
 	for (const FHitResult& Hit : Hits) {
 		AActor* Target = Hit.GetActor();

@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Animation/ANSC_SkillHit.h"
 #include "GAS/CGameplayTags.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -33,9 +30,10 @@ FString UANSC_SkillHit::GetNotifyName_Implementation() const
 
 void UANSC_SkillHit::SendEvent(USkeletalMeshComponent* MeshComp, const FGameplayTag& Tag) const
 {
-	if (AActor* Owner = MeshComp ? MeshComp->GetOwner() : nullptr) {
-		FGameplayEventData Payload;
-		Payload.EventTag = Tag;
-		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Owner, Tag, Payload);
-	}
+	AActor* Owner = MeshComp ? MeshComp->GetOwner() : nullptr;
+	if (!UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner)) return;
+
+	FGameplayEventData Payload;
+	Payload.EventTag = Tag;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Owner, Tag, Payload);
 }

@@ -78,9 +78,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Hit")
 	float HitForwardOffset = 0.0f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Hit")
-	bool bDrawDebugHit = false;
-
 private:
 	bool bInSkillHit = false;
 	TSet<TWeakObjectPtr<AActor>> SkillHitActors;

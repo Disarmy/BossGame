@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GAS/CGameplayAbility_Attack.h"
 #include "GAS/CGameplayTags.h"
 #include "AbilitySystemComponent.h"
@@ -52,11 +49,7 @@ void UCGameplayAbility_Attack::ActivateAbility(const FGameplayAbilitySpecHandle 
 void UCGameplayAbility_Attack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	// 몽타주가 중간에 끊겨도 구간 태그가 남지 않게
-	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo()) {
-		ASC->SetLooseGameplayTagCount(CTags::State_CanCombo, 0);
-		ASC->SetLooseGameplayTagCount(CTags::State_CanCancel, 0);
-	}
+	ClearActionStateTags();
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
@@ -97,7 +90,7 @@ void UCGameplayAbility_Attack::OnMontageEnded()
 void UCGameplayAbility_Attack::OnAttackHit(FGameplayEventData EventData)
 {
 	AActor* Target = const_cast<AActor*>(EventData.Target.Get());
-	const float Damage = ComboDamages.IsValidIndex(ComboIndex) ? ComboDamages[ComboIndex] : 0.f;
+	const float Damage = ComboDamages.IsValidIndex(ComboIndex) ? ComboDamages[ComboIndex] : 0.0f;
 
 	ApplyDamageEffect(Target, DamageEffect, Damage, HitReactTag);
 }
@@ -112,7 +105,7 @@ void UCGameplayAbility_Attack::PlaySection(int32 Index)
 	}
 
 	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
-		this, NAME_None, AttackMontage, 1.f, ComboSections[Index]);
+		this, NAME_None, AttackMontage, 1.0f, ComboSections[Index]);
 	MontageTask->OnCompleted.AddDynamic(this, &UCGameplayAbility_Attack::OnMontageEnded);
 	MontageTask->OnInterrupted.AddDynamic(this, &UCGameplayAbility_Attack::OnMontageEnded);
 	MontageTask->OnCancelled.AddDynamic(this, &UCGameplayAbility_Attack::OnMontageEnded);

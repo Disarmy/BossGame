@@ -1,10 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "GAS/CGameplayAbility.h"
 #include "GAS/CGameplayTags.h"
 #include "CPlayerController.h"
 #include "CUnit.h"
 #include "GameFramework/Controller.h"
+#include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 
 UCGameplayAbility::UCGameplayAbility()
@@ -41,6 +40,14 @@ void UCGameplayAbility::ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayE
 		UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Target));
 }
 
+void UCGameplayAbility::ClearActionStateTags() const
+{
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo()) {
+		ASC->SetLooseGameplayTagCount(CTags::State_CanCombo, 0);
+		ASC->SetLooseGameplayTagCount(CTags::State_CanCancel, 0);
+	}
+}
+
 ACUnit* UCGameplayAbility::GetUnit() const
 {
 	return Cast<ACUnit>(GetAvatarActorFromActorInfo());
@@ -61,7 +68,7 @@ void UCGameplayAbility::FaceAim()
 		return;
 
 	FVector Direction = AimLocation - Unit->GetActorLocation();
-	Direction.Z = 0.f;
+	Direction.Z = 0.0f;
 
 	if (Direction.IsNearlyZero() == false)
 		Unit->SetActorRotation(Direction.Rotation());

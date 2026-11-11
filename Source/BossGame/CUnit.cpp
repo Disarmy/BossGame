@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CUnit.h"
 #include "CStencilComponent.h"
 #include "CWeapon.h"
@@ -124,7 +121,7 @@ void ACUnit::InitAbilitySystem()
 		if (EffectClass == nullptr)
 			continue;
 
-		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, 1.f, Context);
+		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, 1.0f, Context);
 		if (Spec.IsValid())
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 	}

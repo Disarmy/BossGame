@@ -1,8 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "GAS/CGameplayAbility_Skill.h"
 #include "GAS/CGameplayTags.h"
 #include "CUnit.h"
+#include "BossGame.h"
 #include "AbilitySystemComponent.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Engine/OverlapResult.h"
@@ -23,7 +22,12 @@ void UCGameplayAbility_Skill::ApplyCooldown(const FGameplayAbilitySpecHandle Han
 	const FGameplayAbilityActivationInfo ActivationInfo) const
 {
 	UGameplayEffect* CooldownGE = GetCooldownGameplayEffect();
-	if (!CooldownGE || CooldownTags.IsEmpty()) return;
+	if (!CooldownGE) return;
+
+	if (CooldownTags.IsEmpty()) {
+		UE_LOG(LogTemp, Warning, TEXT("%s: CooldownTags is empty, cooldown not applied"), *GetName());
+		return;
+	}
 
 	// 공용 GE_Cooldown_Skill 하나에 이 스킬의 태그와 시간을 실어서 적용
 	FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(CooldownGE->GetClass(), GetAbilityLevel());
@@ -68,9 +72,7 @@ void UCGameplayAbility_Skill::ActivateAbility(const FGameplayAbilitySpecHandle H
 void UCGameplayAbility_Skill::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	// 몽타주가 중간에 끊겨도 캔슬 구간 태그가 남지 않게
-	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
-		ASC->SetLooseGameplayTagCount(CTags::State_CanCancel, 0);
+	ClearActionStateTags();
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
@@ -130,7 +132,7 @@ void UCGameplayAbility_Skill::OnSkillHit(FGameplayEventData EventData)
 
 	// Debug
 #if ENABLE_DRAW_DEBUG
-	if (bDrawDebugHit) {
+	if (CDebug::bDrawHit) {
 		const float LifeTime = bInSkillHit ? -1.0f : 1.0f;
 		const FColor Color = HitActors.IsEmpty() ? FColor::Green : FColor::Red;
 		DrawDebugCircle(World, Center, HitRadius, 32, Color, false, LifeTime, 0, 2.0f, FVector::ForwardVector, FVector::RightVector, false);

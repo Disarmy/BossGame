@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CAttributeSet.h"
 #include "CUnit.h"
 #include "GameplayEffectExtension.h"
@@ -22,13 +19,13 @@ void UCAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 
 	if (Data.EvaluatedData.Attribute == GetDamageAttribute()) {
 		const float LocalDamage = GetDamage();
-		SetDamage(0.f);
+		SetDamage(0.0f);
 
-		if (LocalDamage > 0.f) {
-			SetHP(FMath::Clamp(GetHP() - LocalDamage, 0.f, GetMaxHP()));
+		if (LocalDamage > 0.0f) {
+			SetHP(FMath::Clamp(GetHP() - LocalDamage, 0.0f, GetMaxHP()));
 			
 			// HP 0 → 사망 (마지막 일격에는 피격 반응을 보내지 않음)
-			if (GetHP() <= 0.f) {
+			if (GetHP() <= 0.0f) {
 				if (ACUnit* Unit = Cast<ACUnit>(GetOwningActor()))
 					Unit->Die(Data.EffectSpec.GetContext().GetInstigator());
 				return;
