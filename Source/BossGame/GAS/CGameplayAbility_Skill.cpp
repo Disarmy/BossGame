@@ -3,6 +3,7 @@
 #include "CUnit.h"
 #include "BossGame.h"
 #include "AbilitySystemComponent.h"
+#include "MotionWarpingComponent.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Engine/OverlapResult.h"
 #include "DrawDebugHelpers.h"
@@ -46,6 +47,7 @@ void UCGameplayAbility_Skill::ActivateAbility(const FGameplayAbilitySpecHandle H
 	}
 
 	FaceAim();
+	SetWarpTarget();
 
 	// 몽타주 타격 프레임의 노티파이(Event.Skill.Hit)마다 범위 판정
 	UAbilityTask_WaitGameplayEvent* WaitHit = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
@@ -74,6 +76,12 @@ void UCGameplayAbility_Skill::EndAbility(const FGameplayAbilitySpecHandle Handle
 {
 	ClearActionStateTags();
 
+	if (!WarpTargetName.IsNone()) {
+		ACUnit* Unit = GetUnit();
+		if (UMotionWarpingComponent* Warp = Unit ? Unit->FindComponentByClass<UMotionWarpingComponent>() : nullptr)
+			Warp->RemoveWarpTarget(WarpTargetName);
+	}
+
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
@@ -92,6 +100,29 @@ bool UCGameplayAbility_Skill::IsInHitArea(const FVector& Center, const FVector& 
 
 	const float CosHalf = FMath::Cos(FMath::DegreesToRadians(HitAngle * 0.5f));
 	return FVector::DotProduct(Forward, ToPoint / Dist) >= CosHalf;
+}
+
+void UCGameplayAbility_Skill::SetWarpTarget()
+{
+	if (WarpTargetName.IsNone()) return;
+
+	ACUnit* Unit = GetUnit();
+	UMotionWarpingComponent* Warp = Unit ? Unit->FindComponentByClass<UMotionWarpingComponent>() : nullptr;
+	if (!Warp) return;
+
+	const FVector Start = Unit->GetActorLocation();
+
+	// 조준 실패 시 정면 최대 거리
+	FVector Target = Start + Unit->GetActorForwardVector() * WarpMaxDistance;
+
+	FVector AimLocation;
+	if (GetAimLocation(AimLocation)) {
+		FVector ToAim = AimLocation - Start;
+		ToAim.Z = 0.0f;
+		Target = Start + ToAim.GetClampedToMaxSize(WarpMaxDistance);
+	}
+
+	Warp->AddOrUpdateWarpTargetFromLocationAndRotation(WarpTargetName, Target, Unit->GetActorRotation());
 }
 
 void UCGameplayAbility_Skill::ApplySkillDamage(AActor* Target)

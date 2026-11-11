@@ -24,6 +24,8 @@ protected:
 
 	void ClearActionStateTags() const;
 
+	bool GetAimLocation(FVector& OutLocation) const;
+
 protected:
 	UFUNCTION(BlueprintPure, Category = "Ability")
 	ACUnit* GetUnit() const;

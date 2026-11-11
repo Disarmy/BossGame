@@ -48,6 +48,13 @@ void UCGameplayAbility::ClearActionStateTags() const
 	}
 }
 
+bool UCGameplayAbility::GetAimLocation(FVector& OutLocation) const
+{
+	const ACPlayerController* PC = Cast<ACPlayerController>(GetCurrentActorInfo()->PlayerController.Get());
+	return PC && PC->GetAimLocation(OutLocation);
+}
+
+
 ACUnit* UCGameplayAbility::GetUnit() const
 {
 	return Cast<ACUnit>(GetAvatarActorFromActorInfo());
@@ -56,20 +63,12 @@ ACUnit* UCGameplayAbility::GetUnit() const
 void UCGameplayAbility::FaceAim()
 {
 	ACUnit* Unit = GetUnit();
-	if (Unit == nullptr)
-		return;
-
-	const ACPlayerController* PC = Cast<ACPlayerController>(GetCurrentActorInfo()->PlayerController.Get());
-	if (PC == nullptr)
-		return;
-
 	FVector AimLocation;
-	if (PC->GetAimLocation(AimLocation) == false)
-		return;
+	if (!Unit || !GetAimLocation(AimLocation)) return;
 
 	FVector Direction = AimLocation - Unit->GetActorLocation();
 	Direction.Z = 0.0f;
 
-	if (Direction.IsNearlyZero() == false)
+	if (!Direction.IsNearlyZero())
 		Unit->SetActorRotation(Direction.Rotation());
 }

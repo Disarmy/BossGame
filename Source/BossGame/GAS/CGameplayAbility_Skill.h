@@ -30,6 +30,8 @@ private:
 	// 대상이 판정 범위(안쪽~바깥 반지름, 각도) 안에 있는지. 대상 캡슐 반지름만큼 여유를 줌
 	bool IsInHitArea(const FVector& Center, const FVector& Forward, const FVector& Point, float TargetRadius) const;
 
+	void SetWarpTarget();
+
 protected:
 	// 장판, 투사체처럼 범위 판정 밖에서 맞힌 대상에게 이 스킬의 데미지를 줄 때
 	UFUNCTION(BlueprintCallable, Category = "Damage")
@@ -77,6 +79,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hit")
 	float HitForwardOffset = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Warp")
+	FName WarpTargetName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Warp")
+	float WarpMaxDistance = 600.0f;
 
 private:
 	bool bInSkillHit = false;

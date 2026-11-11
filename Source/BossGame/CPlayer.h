@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,6 +8,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UCGameplayAbility;
+class UMotionWarpingComponent;
 
 UCLASS()
 class BOSSGAME_API ACPlayer : public ACUnit
@@ -33,6 +32,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCameraComponent> Camera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UMotionWarpingComponent> MotionWarping;
 
 	// 스킬 목록 (Input.Skill.SlotN → 스킬 GA)
 	UPROPERTY(EditDefaultsOnly, Category = "Ability", meta = (Categories = "Input.Skill"))
