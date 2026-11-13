@@ -20,6 +20,8 @@ protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
+	FGameplayEffectSpecHandle MakeDamageSpec(TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const;
+
 	void ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const;
 
 	void ClearActionStateTags() const;

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "NativeGameplayTags.h"
@@ -15,6 +13,7 @@ namespace CTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Invincible);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_CanCombo);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_CanCancel);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Targeting);
 
 	// Event
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Hit); 
@@ -25,6 +24,7 @@ namespace CTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Skill_Hit);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Skill_HitBegin);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Skill_HitEnd);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Target_Confirm);
 
 	// Lock
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Lock_Move);

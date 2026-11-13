@@ -1,11 +1,14 @@
 #include "GAS/CGameplayAbility_Skill.h"
 #include "GAS/CGameplayTags.h"
 #include "CUnit.h"
+#include "CAoE.h"
+#include "CAimIndicator.h"
 #include "BossGame.h"
 #include "AbilitySystemComponent.h"
 #include "MotionWarpingComponent.h"
-#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+#include "Components/CapsuleComponent.h"
 #include "Engine/OverlapResult.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "DrawDebugHelpers.h"
 
 UCGameplayAbility_Skill::UCGameplayAbility_Skill()
@@ -40,23 +43,14 @@ void UCGameplayAbility_Skill::ApplyCooldown(const FGameplayAbilitySpecHandle Han
 void UCGameplayAbility_Skill::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	// 쿨타임 시작 (실패하면 발동 취소)
-	if (!CommitAbility(Handle, ActorInfo, ActivationInfo)) {
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
-		return;
-	}
-
-	FaceAim();
-	SetWarpTarget();
+	bInSkillHit = false;
+	SkillHitActors.Reset();
 
 	// 몽타주 타격 프레임의 노티파이(Event.Skill.Hit)마다 범위 판정
 	UAbilityTask_WaitGameplayEvent* WaitHit = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
 		this, CTags::Event_Skill_Hit, nullptr, false, true);
 	WaitHit->EventReceived.AddDynamic(this, &UCGameplayAbility_Skill::OnSkillHit);
 	WaitHit->ReadyForActivation();
-
-	bInSkillHit = false;
-	SkillHitActors.Reset();
 
 	UAbilityTask_WaitGameplayEvent* WaitHitBegin = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
 		this, CTags::Event_Skill_HitBegin, nullptr, false, true);
@@ -68,12 +62,24 @@ void UCGameplayAbility_Skill::ActivateAbility(const FGameplayAbilitySpecHandle H
 	WaitHitEnd->EventReceived.AddDynamic(this, &UCGameplayAbility_Skill::OnSkillHitEnd);
 	WaitHitEnd->ReadyForActivation();
 
+	if (bUseTargeting) {
+		BeginTargeting();
+	}
+	else if (!StartCast()) {
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);   // 이동 정지 + BP 그래프
 }
 
 void UCGameplayAbility_Skill::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	if (bTargeting) {
+		EndTargeting();
+	}
+
 	ClearActionStateTags();
 
 	if (!WarpTargetName.IsNone()) {
@@ -85,21 +91,103 @@ void UCGameplayAbility_Skill::EndAbility(const FGameplayAbilitySpecHandle Handle
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-bool UCGameplayAbility_Skill::IsInHitArea(const FVector& Center, const FVector& Forward, const FVector& Point, float TargetRadius) const
+FCHitArea UCGameplayAbility_Skill::MakeHitArea() const
 {
-	FVector ToPoint = Point - Center;
-	ToPoint.Z = 0.0f;
-	const float Dist = ToPoint.Size();
+	FCHitArea Area;
+	Area.Radius = HitRadius;
+	Area.InnerRadius = HitInnerRadius;
+	Area.Angle = HitAngle;
+	return Area;
+}
 
-	// 거리: 대상 캡슐이 바깥 원에 걸치면 맞음, 안쪽 원에 완전히 들어가 있으면 안 맞음
-	if (Dist - TargetRadius > HitRadius) return false;
-	if (Dist + TargetRadius < HitInnerRadius) return false;
+FVector UCGameplayAbility_Skill::GetAimPoint() const
+{
+	const ACUnit* Unit = GetUnit();
+	if (!Unit) return FVector::ZeroVector;
 
-	// 각도: 360이면 원, 대상이 중심에 겹쳐 있으면 맞음
-	if (HitAngle >= 360.0f || Dist <= KINDA_SMALL_NUMBER) return true;
+	const FVector Start = Unit->GetActorLocation();
 
-	const float CosHalf = FMath::Cos(FMath::DegreesToRadians(HitAngle * 0.5f));
-	return FVector::DotProduct(Forward, ToPoint / Dist) >= CosHalf;
+	// 조준 실패 시 정면 최대 거리
+	FVector Point = Start + Unit->GetActorForwardVector() * FieldMaxDistance;
+
+	FVector AimLocation;
+	if (GetAimLocation(AimLocation)) {
+		FVector ToAim = AimLocation - Start;
+		ToAim.Z = 0.0f;
+		Point = Start + ToAim.GetClampedToMaxSize(FieldMaxDistance);
+	}
+
+	// 바닥과 겹치지 않게
+	Point.Z = Start.Z - Unit->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 2.0f;
+	return Point;
+}
+
+bool UCGameplayAbility_Skill::StartCast()
+{
+	if (!CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo))
+		return false;
+
+	FaceAim();
+	SetWarpTarget();
+
+	if (FieldClass)
+		FieldLocation = GetAimPoint();
+
+	return true;
+}
+
+void UCGameplayAbility_Skill::BeginTargeting()
+{
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
+	ACUnit* Unit = GetUnit();
+	if (!ASC || !Unit) return;
+
+	bTargeting = true;
+	ASC->AddLooseGameplayTag(CTags::State_Targeting);
+	ASC->AddLooseGameplayTag(CTags::State_CanCancel);   // 조준 중에는 언제든 취소 가능
+
+	if (IndicatorClass) {
+		FActorSpawnParameters Params;
+		Params.Owner = Unit;
+
+		Indicator = Unit->GetWorld()->SpawnActor<ACAimIndicator>(IndicatorClass, GetAimPoint(), FRotator::ZeroRotator, Params);
+		if (Indicator)
+			Indicator->Init(this, HitRadius);
+	}
+
+	UAbilityTask_WaitGameplayEvent* WaitConfirm = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+		this, CTags::Event_Target_Confirm, nullptr, true, true);
+	WaitConfirm->EventReceived.AddDynamic(this, &UCGameplayAbility_Skill::OnTargetConfirm);
+	WaitConfirm->ReadyForActivation();
+}
+
+void UCGameplayAbility_Skill::EndTargeting()
+{
+	bTargeting = false;
+
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo()) {
+		ASC->SetLooseGameplayTagCount(CTags::State_Targeting, 0);
+		ASC->SetLooseGameplayTagCount(CTags::State_CanCancel, 0);
+	}
+
+	if (Indicator) {
+		Indicator->Destroy();
+		Indicator = nullptr;
+	}
+}
+
+void UCGameplayAbility_Skill::SpawnField()
+{
+	ACUnit* Unit = GetUnit();
+	if (!Unit) return;
+
+	FActorSpawnParameters Params;
+	Params.Owner = Unit;
+	Params.Instigator = Unit;
+
+	const FRotator Rotation(0.0f, Unit->GetActorRotation().Yaw, 0.0f);
+	if (ACAoE* Field = Unit->GetWorld()->SpawnActor<ACAoE>(FieldClass, FieldLocation, Rotation, Params))
+		Field->Activate(MakeHitArea(), FieldDuration, FieldInterval, MakeDamageSpec(DamageEffect, Damage, HitReactTag));
 }
 
 void UCGameplayAbility_Skill::SetWarpTarget()
@@ -132,8 +220,15 @@ void UCGameplayAbility_Skill::ApplySkillDamage(AActor* Target)
 
 void UCGameplayAbility_Skill::OnSkillHit(FGameplayEventData EventData)
 {
+	if (FieldClass) {
+		SpawnField();
+		return;
+	}
+
 	ACUnit* Unit = GetUnit();
 	if (!Unit) return;
+
+	const FCHitArea Area = MakeHitArea();
 
 	UWorld* World = Unit->GetWorld();
 	const FVector Forward = Unit->GetActorForwardVector().GetSafeNormal2D();
@@ -151,7 +246,7 @@ void UCGameplayAbility_Skill::OnSkillHit(FGameplayEventData EventData)
 		if (!Target || HitActors.Contains(Target)) continue;
 		if (bInSkillHit && SkillHitActors.Contains(Target)) continue;
 
-		if (!IsInHitArea(Center, Forward, Target->GetActorLocation(), Target->GetSimpleCollisionRadius()))
+		if (!Area.Contains(Center, Forward, Target->GetActorLocation(), Target->GetSimpleCollisionRadius()))
 			continue;
 
 		HitActors.Add(Target);
@@ -188,4 +283,19 @@ void UCGameplayAbility_Skill::OnSkillHitBegin(FGameplayEventData EventData)
 void UCGameplayAbility_Skill::OnSkillHitEnd(FGameplayEventData EventData)
 {
 	bInSkillHit = false;
+}
+
+void UCGameplayAbility_Skill::OnTargetConfirm(FGameplayEventData EventData)
+{
+
+	if (!bTargeting) return;
+
+	EndTargeting();
+
+	if (!StartCast()) {
+		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+		return;
+	}
+
+	MontageJumpToSection(CastSection);
 }

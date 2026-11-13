@@ -27,14 +27,22 @@ void UCGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-void UCGameplayAbility::ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const
+FGameplayEffectSpecHandle UCGameplayAbility::MakeDamageSpec(TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const
 {
-	if (!Target || !Effect) return;
+	if (!Effect) return FGameplayEffectSpecHandle();
 
 	FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(Effect, GetAbilityLevel());
 	Spec.Data->SetSetByCallerMagnitude(CTags::Data_Damage, Damage);
 	if (HitReactTag.IsValid())
 		Spec.Data->AddDynamicAssetTag(HitReactTag);
+
+	return Spec;
+}
+
+void UCGameplayAbility::ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const
+{
+	const FGameplayEffectSpecHandle Spec = MakeDamageSpec(Effect, Damage, HitReactTag);
+	if (!Target || !Spec.IsValid()) return;
 
 	ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, Spec,
 		UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Target));

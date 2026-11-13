@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CGameplayTags.h"
 
 namespace CTags
@@ -11,7 +8,8 @@ namespace CTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Dead, "State.Dead", "사망");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Invincible, "State.Invincible", "무적");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_CanCombo, "State.CanCombo", "콤보 선입력 구간");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_CanCancel, "State.CanCancel", "후딜 캔슬 구간");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_CanCancel, "State.CanCancel", "후딜 캔슬 구간");	
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Targeting, "State.Targeting", "스킬 조준 중");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Hit, "Event.Hit", "피격이벤트");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Hit_Flinch, "Event.Hit.Flinch", "경직 피격");
@@ -21,6 +19,7 @@ namespace CTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Skill_Hit, "Event.Skill.Hit", "스킬 범위 판정 시점");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Skill_HitBegin, "Event.Skill.HitBegin", "스킬 판정 구간 시작");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Skill_HitEnd, "Event.Skill.HitEnd", "스킬 판정 구간 끝");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Target_Confirm, "Event.Target.Confirm", "조준 확정");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Lock_Move, "Lock.Move", "이동 차단");
 

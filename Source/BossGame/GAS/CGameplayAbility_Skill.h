@@ -1,10 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CHitArea.h"
 #include "GAS/CGameplayAbility.h"
 #include "CGameplayAbility_Skill.generated.h"
 
 class UGameplayEffect;
+class ACAoE;
+class ACAimIndicator;
 
 // 스킬 공통 부모: 스킬 이름 기준 쿨타임, 캐릭터 기준 범위 판정
 UCLASS()
@@ -19,6 +22,8 @@ public:
 	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo) const override;
 
+	FVector GetAimPoint() const;
+
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
@@ -27,9 +32,14 @@ protected:
 		const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
 private:
-	// 대상이 판정 범위(안쪽~바깥 반지름, 각도) 안에 있는지. 대상 캡슐 반지름만큼 여유를 줌
-	bool IsInHitArea(const FVector& Center, const FVector& Forward, const FVector& Point, float TargetRadius) const;
+	FCHitArea MakeHitArea() const;
 
+	bool StartCast();
+
+	void BeginTargeting();
+	void EndTargeting();
+
+	void SpawnField();
 	void SetWarpTarget();
 
 protected:
@@ -46,6 +56,9 @@ private:
 
 	UFUNCTION()
 	void OnSkillHitEnd(FGameplayEventData EventData);
+
+	UFUNCTION()
+	void OnTargetConfirm(FGameplayEventData EventData);
 
 protected:
 	// 스킬 이름 쿨타임 태그 (예: Cooldown.Skill.SlideAttack). 슬롯과 무관
@@ -86,7 +99,37 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Warp")
 	float WarpMaxDistance = 600.0f;
 
-private:
+	// 지정하면 캐릭터 기준 판정 대신 조준 위치에 장판을 깔고, Hit 값은 장판의 범위가 됨
+	UPROPERTY(EditDefaultsOnly, Category = "Field")
+	TSubclassOf<ACAoE> FieldClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Field")
+	float FieldDuration = 5.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Field")
+	float FieldInterval = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Field")
+	float FieldMaxDistance = 800.0f;
+
+	// 켜면 발동 후 조준 단계를 거치고, 확정할 때 쿨타임이 시작됨
+	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+	bool bUseTargeting = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+	TSubclassOf<ACAimIndicator> IndicatorClass;
+
+	// 확정 시 넘어갈 몽타주 섹션
+	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+	FName CastSection = TEXT("Cast");
+
+private:	
+	UPROPERTY()
+	TObjectPtr<ACAimIndicator> Indicator;
+
+	bool bTargeting = false;
 	bool bInSkillHit = false;
+
 	TSet<TWeakObjectPtr<AActor>> SkillHitActors;
+	FVector FieldLocation;
 };

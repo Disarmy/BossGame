@@ -104,6 +104,14 @@ void ACPlayerController::OnAbilityInput(FGameplayTag InputTag)
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn());
 	if (!IsValid(ASC)) return;
 
+	// 조준 중 좌클릭은 공격이 아니라 확정
+	if (InputTag == CTags::Input_Attack && ASC->HasMatchingGameplayTag(CTags::State_Targeting)) {
+		FGameplayEventData EventData;
+		EventData.EventTag = CTags::Event_Target_Confirm;
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetPawn(), CTags::Event_Target_Confirm, EventData);
+		return;
+	}
+
 	TArray<FGameplayAbilitySpecHandle> Handles;
 	bool bActiveFound = false;
 
