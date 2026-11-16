@@ -1,6 +1,6 @@
 #include "CAimIndicator.h"
 #include "CStencilComponent.h"
-#include "GAS/CGameplayAbility_Skill.h"
+#include "GAS/CGameplayAbility_Skill_Target.h"
 #include "Components/StaticMeshComponent.h"
 
 ACAimIndicator::ACAimIndicator()
@@ -17,7 +17,7 @@ ACAimIndicator::ACAimIndicator()
 	StencilComponent->SetStencil(EStencilType::KeepColor);
 }
 
-void ACAimIndicator::Init(const UCGameplayAbility_Skill* InAbility, float Radius)
+void ACAimIndicator::Init(const UCGameplayAbility_Skill_Target* InAbility, float Radius)
 {
 	Ability = InAbility;
 

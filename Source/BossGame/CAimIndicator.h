@@ -5,7 +5,7 @@
 #include "CAimIndicator.generated.h"
 
 class UCStencilComponent;
-class UCGameplayAbility_Skill;
+class UCGameplayAbility_Skill_Target;
 
 UCLASS()
 class BOSSGAME_API ACAimIndicator : public AActor
@@ -15,7 +15,7 @@ class BOSSGAME_API ACAimIndicator : public AActor
 public:	
 	ACAimIndicator();
 
-	void Init(const UCGameplayAbility_Skill* InAbility, float Radius);
+	void Init(const UCGameplayAbility_Skill_Target* InAbility, float Radius);
 
 protected:
 	virtual void Tick(float DeltaTime) override;
@@ -32,5 +32,5 @@ protected:
 	float MeshRadius = 50.0f;
 	
 private:
-	TWeakObjectPtr<const UCGameplayAbility_Skill> Ability;
+	TWeakObjectPtr<const UCGameplayAbility_Skill_Target> Ability;
 };
