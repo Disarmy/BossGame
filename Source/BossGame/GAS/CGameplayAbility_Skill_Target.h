@@ -5,6 +5,9 @@
 #include "GAS/CGameplayAbility_Skill.h"
 #include "CGameplayAbility_Skill_Target.generated.h"
 
+class ACAoE;
+class ACAimIndicator;
+
 // 위치 조준 후 시전 스킬
 // 스킬 확정할 때 쿨타임 시작
 UCLASS()

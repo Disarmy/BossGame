@@ -1,13 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CHitArea.h"
 #include "GAS/CGameplayAbility.h"
 #include "CGameplayAbility_Skill.generated.h"
 
 class UGameplayEffect;
-class ACAoE;
-class ACAimIndicator;
 
 // 스킬 공통 부모: 스킬 이름 기준 쿨타임, 캐릭터 기준 범위 판정
 UCLASS()

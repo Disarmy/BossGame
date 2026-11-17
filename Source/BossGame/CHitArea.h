@@ -9,6 +9,12 @@ struct FCHitArea
 {
 	GENERATED_BODY()
 
+	// 대상 캡슐 반지름만큼 여유를 줌
+	bool Contains(const FVector& Center, const FVector& Forward, const FVector& Point, float TargetRadius) const;
+
+	// 범위 안의 Pawn을 모음 (Ignore 제외, 대상당 한 번)
+	void GetTargets(const UWorld* World, const FVector& Center, const FVector& Forward, const AActor* Ignore, TArray<AActor*>& OutTargets) const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Radius = 200.0f;
 
@@ -19,7 +25,4 @@ struct FCHitArea
 	// 360이면 원, 작으면 정면 부채꼴
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "360"))
 	float Angle = 360.0f;
-
-	// 대상 캡슐 반지름만큼 여유를 줌
-	bool Contains(const FVector& Center, const FVector& Forward, const FVector& Point, float TargetRadius) const;
 };
