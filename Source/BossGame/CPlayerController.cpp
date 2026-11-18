@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CPlayerController.h"
 #include "CUnit.h"
 #include "CTypes.h"
@@ -16,6 +13,11 @@
 ACPlayerController::ACPlayerController()
 {
 	bShowMouseCursor = true;
+
+	CancelTags.AddTag(CTags::Ability_Attack);
+	CancelTags.AddTag(CTags::Ability_Dodge);
+	CancelTags.AddTag(CTags::Ability_Down);
+	CancelTags.AddTag(CTags::Ability_Skill);
 }
 
 bool ACPlayerController::GetAimLocation(FVector& OutLocation) const
@@ -60,33 +62,28 @@ void ACPlayerController::SetupInputComponent()
 
 void ACPlayerController::OnMove(const FInputActionValue & Value)
 {
-	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn())) {
-		if (ASC->HasMatchingGameplayTag(CTags::Lock_Move)) {
-			return;
-		}
-	}
+	ACUnit* Unit = Cast<ACUnit>(GetPawn());
+	if (!Unit) return;
 
+	const UAbilitySystemComponent* ASC = Unit->GetAbilitySystemComponent();
+	if (ASC && ASC->HasMatchingGameplayTag(CTags::Lock_Move)) return;
 
 	FHitResult Hit;
 	// Cursor 채널
 	if (GetHitResultUnderCursor(ECC_Cursor, false, Hit) == false)
 		return;
 
-	APawn* MyPawn = GetPawn();
-	if (IsValid(MyPawn) == false)
-		return;
-
 	FVector Destination = Hit.Location;
 
 	// 유닛(보스, 몹)을 클릭하면 그 둘레의 가장 가까운 지점으로
 	ACUnit* Target = Cast<ACUnit>(Hit.GetActor());
-	if (IsValid(Target) && Target != MyPawn)
+	if (IsValid(Target) && Target != Unit)
 	{
 		const FVector TargetLocation = Target->GetActorLocation();
-		const FVector Direction = (MyPawn->GetActorLocation() - TargetLocation).GetSafeNormal2D();
+		const FVector Direction = (Unit->GetActorLocation() - TargetLocation).GetSafeNormal2D();
 
 		const float Gap = Target->GetCapsuleComponent()->GetScaledCapsuleRadius()
-			+ Cast<ACharacter>(MyPawn)->GetCapsuleComponent()->GetScaledCapsuleRadius()
+			+ Unit->GetCapsuleComponent()->GetScaledCapsuleRadius()
 			+ StopDistance;
 
 		Destination = TargetLocation + Direction * Gap;
@@ -107,13 +104,21 @@ void ACPlayerController::OnAbilityInput(FGameplayTag InputTag)
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn());
 	if (!IsValid(ASC)) return;
 
+	// 조준 중 좌클릭은 공격이 아니라 확정
+	if (InputTag == CTags::Input_Attack && ASC->HasMatchingGameplayTag(CTags::State_Targeting)) {
+		FGameplayEventData EventData;
+		EventData.EventTag = CTags::Event_Target_Confirm;
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetPawn(), CTags::Event_Target_Confirm, EventData);
+		return;
+	}
+
 	TArray<FGameplayAbilitySpecHandle> Handles;
 	bool bActiveFound = false;
 
 	for (const FGameplayAbilitySpec& Spec : ASC->GetActivatableAbilities()) {
 		const UCGameplayAbility* Ability = Cast<UCGameplayAbility>(Spec.Ability);
 
-		if (!Ability || !Ability->GetInputTag().MatchesTagExact(InputTag)) {
+		if (!Ability || !Spec.GetDynamicSpecSourceTags().HasTagExact(InputTag)) {
 			continue;
 		}
 
@@ -144,12 +149,6 @@ bool ACPlayerController::TryCancelCurAction(UAbilitySystemComponent* ASC)
 {
 	if (!ASC || !ASC->HasMatchingGameplayTag(CTags::State_CanCancel))
 		return false;
-
-	// 캔슬 구간을 여는 동작들. 스킬이 생기면 Ability.Skill 추가
-	FGameplayTagContainer CancelTags;
-	CancelTags.AddTag(CTags::Ability_Attack);
-	CancelTags.AddTag(CTags::Ability_Dodge);
-	CancelTags.AddTag(CTags::Ability_Down);
 
 	ASC->CancelAbilities(&CancelTags);
 	return true;

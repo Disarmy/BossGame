@@ -1,11 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GAS/CGameplayAbility.h"
 #include "GAS/CGameplayTags.h"
-#include "CUnit.h"
 #include "CPlayerController.h"
+#include "CUnit.h"
 #include "GameFramework/Controller.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 UCGameplayAbility::UCGameplayAbility()
 {
@@ -28,6 +27,42 @@ void UCGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
+FGameplayEffectSpecHandle UCGameplayAbility::MakeDamageSpec(TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const
+{
+	if (!Effect) return FGameplayEffectSpecHandle();
+
+	FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(Effect, GetAbilityLevel());
+	Spec.Data->SetSetByCallerMagnitude(CTags::Data_Damage, Damage);
+	if (HitReactTag.IsValid())
+		Spec.Data->AddDynamicAssetTag(HitReactTag);
+
+	return Spec;
+}
+
+void UCGameplayAbility::ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const
+{
+	const FGameplayEffectSpecHandle Spec = MakeDamageSpec(Effect, Damage, HitReactTag);
+	if (!Target || !Spec.IsValid()) return;
+
+	ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, Spec,
+		UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Target));
+}
+
+void UCGameplayAbility::ClearActionStateTags() const
+{
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo()) {
+		ASC->SetLooseGameplayTagCount(CTags::State_CanCombo, 0);
+		ASC->SetLooseGameplayTagCount(CTags::State_CanCancel, 0);
+	}
+}
+
+bool UCGameplayAbility::GetAimLocation(FVector& OutLocation) const
+{
+	const ACPlayerController* PC = Cast<ACPlayerController>(GetCurrentActorInfo()->PlayerController.Get());
+	return PC && PC->GetAimLocation(OutLocation);
+}
+
+
 ACUnit* UCGameplayAbility::GetUnit() const
 {
 	return Cast<ACUnit>(GetAvatarActorFromActorInfo());
@@ -36,20 +71,12 @@ ACUnit* UCGameplayAbility::GetUnit() const
 void UCGameplayAbility::FaceAim()
 {
 	ACUnit* Unit = GetUnit();
-	if (Unit == nullptr)
-		return;
-
-	const ACPlayerController* PC = Cast<ACPlayerController>(GetCurrentActorInfo()->PlayerController.Get());
-	if (PC == nullptr)
-		return;
-
 	FVector AimLocation;
-	if (PC->GetAimLocation(AimLocation) == false)
-		return;
+	if (!Unit || !GetAimLocation(AimLocation)) return;
 
 	FVector Direction = AimLocation - Unit->GetActorLocation();
-	Direction.Z = 0.f;
+	Direction.Z = 0.0f;
 
-	if (Direction.IsNearlyZero() == false)
+	if (!Direction.IsNearlyZero())
 		Unit->SetActorRotation(Direction.Rotation());
 }

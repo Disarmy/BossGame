@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -43,6 +41,9 @@ protected:
 	TMap<TObjectPtr<UInputAction>, FGameplayTag> AbilityInputs;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Move")
-	float StopDistance = 30.f;   // 캡슐끼리 닿기 직전 여유
+	float StopDistance = 30.0f;   // 캡슐끼리 닿기 직전 여유
 
+private:
+	// 캔슬 구간(State.CanCancel)에서 끊을 수 있는 동작
+	FGameplayTagContainer CancelTags;
 };

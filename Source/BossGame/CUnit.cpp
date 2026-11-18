@@ -1,12 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CUnit.h"
 #include "CStencilComponent.h"
 #include "CWeapon.h"
 #include "GAS/CAttributeSet.h"
-#include "AbilitySystemComponent.h"
 #include "GAS/CGameplayTags.h"
+#include "GAS/CGameplayAbility.h"
+#include "AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -103,8 +101,16 @@ void ACUnit::InitAbilitySystem()
 
 	for (const TSubclassOf<UGameplayAbility>& AbilityClass : DefaultAbilities)
 	{
-		if (AbilityClass)
-			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AbilityClass, 1, INDEX_NONE, this));
+		if (!AbilityClass) continue;
+
+		FGameplayAbilitySpec Spec(AbilityClass, 1, INDEX_NONE, this);
+
+		// 입력 매칭은 Spec 태그로
+		const UCGameplayAbility* CDO = Cast<UCGameplayAbility>(AbilityClass->GetDefaultObject());
+		if (CDO && CDO->GetInputTag().IsValid())
+			Spec.GetDynamicSpecSourceTags().AddTag(CDO->GetInputTag());
+
+		AbilitySystemComponent->GiveAbility(Spec);
 	}
 
 	FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
@@ -115,7 +121,7 @@ void ACUnit::InitAbilitySystem()
 		if (EffectClass == nullptr)
 			continue;
 
-		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, 1.f, Context);
+		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, 1.0f, Context);
 		if (Spec.IsValid())
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 	}

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -37,10 +35,7 @@ protected:
 	TObjectPtr<USceneComponent> TraceEnd;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Trace")
-	float TraceRadius = 20.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Trace")
-	bool bDrawDebug = false;
+	float TraceRadius = 20.0f;
 
 private:
 	UPROPERTY()
