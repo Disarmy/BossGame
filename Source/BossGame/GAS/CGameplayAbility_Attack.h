@@ -1,9 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GAS/CGameplayAbility.h"
+#include "Engine/DataTable.h"
 #include "CGameplayAbility_Attack.generated.h"
 
 class UAnimMontage;
@@ -50,13 +49,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TSubclassOf<UGameplayEffect> DamageEffect;
 
-	// 콤보 단계별 데미지 (ComboSections와 같은 순서)
-	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	TArray<float> ComboDamages;
-
-	// 맞은 대상의 반응 (비우면 데미지만, 일반 몬스터 공격)
-	UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (Categories = "Data.HitReact"))
-	FGameplayTag HitReactTag;
+	// 콤보 단계별 공격 데이터 (ComboSections와 같은 순서)
+	UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (RowType = "/Script/BossGame.CAttackData"))
+	TArray<FDataTableRowHandle> ComboAttacks;
 
 private:
 	// 실행 중 상태 (ActivateAbility에서 매번 초기화)

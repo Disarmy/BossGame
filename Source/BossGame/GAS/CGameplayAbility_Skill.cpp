@@ -78,12 +78,12 @@ bool UCGameplayAbility_Skill::StartCast()
 
 FGameplayEffectSpecHandle UCGameplayAbility_Skill::MakeSkillDamageSpec() const
 {
-	return MakeDamageSpec(DamageEffect, Damage, HitReactTag);
+	return MakeDamageSpec(DamageEffect, Attack);
 }
 
 void UCGameplayAbility_Skill::ApplySkillDamage(AActor* Target)
 {
-	ApplyDamageEffect(Target, DamageEffect, Damage, HitReactTag);
+	ApplyDamageEffect(Target, DamageEffect, Attack);
 }
 
 void UCGameplayAbility_Skill::OnSkillHitEvent(FGameplayEventData EventData)

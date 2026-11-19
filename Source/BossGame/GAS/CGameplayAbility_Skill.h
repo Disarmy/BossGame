@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GAS/CGameplayAbility.h"
+#include "Engine/DataTable.h"
 #include "CGameplayAbility_Skill.generated.h"
 
 class UGameplayEffect;
@@ -54,10 +55,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TSubclassOf<UGameplayEffect> DamageEffect;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	float Damage = 0.0f;
-
-	// 맞은 대상의 반응 (비우면 데미지만)
-	UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (Categories = "Data.HitReact"))
-	FGameplayTag HitReactTag;
+	UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (RowType = "/Script/BossGame.CAttackData"))
+	FDataTableRowHandle Attack;
 };

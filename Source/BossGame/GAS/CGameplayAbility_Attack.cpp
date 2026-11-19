@@ -89,10 +89,10 @@ void UCGameplayAbility_Attack::OnMontageEnded()
 
 void UCGameplayAbility_Attack::OnAttackHit(FGameplayEventData EventData)
 {
-	AActor* Target = const_cast<AActor*>(EventData.Target.Get());
-	const float Damage = ComboDamages.IsValidIndex(ComboIndex) ? ComboDamages[ComboIndex] : 0.0f;
+	if (!ComboAttacks.IsValidIndex(ComboIndex)) return;
 
-	ApplyDamageEffect(Target, DamageEffect, Damage, HitReactTag);
+	AActor* Target = const_cast<AActor*>(EventData.Target.Get());
+	ApplyDamageEffect(Target, DamageEffect, ComboAttacks[ComboIndex]);
 }
 
 void UCGameplayAbility_Attack::PlaySection(int32 Index)
