@@ -22,7 +22,7 @@ protected:
 	virtual void OnSkillHit() override;
 
 private:
-	void HitArea(const FCHitArea& Area, float InDamage, const FGameplayTag& InHitReactTag);
+	void HitArea(const FCHitArea& Area, const FDataTableRowHandle& AttackRow);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Summon")
@@ -39,11 +39,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Explosion")
 	FCHitArea ExplosionArea;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Explosion")
-	float ExplosionDamage = 0.0f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Explosion", meta = (Categories = "Data.HitReact"))
-	FGameplayTag ExplosionHitReactTag;
+	UPROPERTY(EditDefaultsOnly, Category = "Explosion", meta = (RowType = "/Script/BossGame.CAttackData"))
+	FDataTableRowHandle ExplosionAttack;
 
 private:
 	UPROPERTY()

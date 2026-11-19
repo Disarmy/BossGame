@@ -42,21 +42,21 @@ bool UCGameplayAbility_Skill_Summon::StartCast()
 void UCGameplayAbility_Skill_Summon::OnSkillHit()
 {
 	if (HitCount++ == 0) {
-		HitArea(ImpactArea, Damage, HitReactTag);
+		HitArea(ImpactArea, Attack);
 
 		if (IsValid(Summon))
 			Summon->ReceiveImpact();
 		return;
 	}
 
-	HitArea(ExplosionArea, ExplosionDamage, ExplosionHitReactTag);
+	HitArea(ExplosionArea, ExplosionAttack);
 
 	if (IsValid(Summon))
 		Summon->ReceiveExplode();
 	Summon = nullptr;   // 이후 제거는 소환물 BP가 맡음
 }
 
-void UCGameplayAbility_Skill_Summon::HitArea(const FCHitArea& Area, float InDamage, const FGameplayTag& InHitReactTag)
+void UCGameplayAbility_Skill_Summon::HitArea(const FCHitArea& Area, const FDataTableRowHandle& AttackRow)
 {
 	ACUnit* Unit = GetUnit();
 	if (!Unit) return;
@@ -65,7 +65,7 @@ void UCGameplayAbility_Skill_Summon::HitArea(const FCHitArea& Area, float InDama
 	Area.GetTargets(Unit->GetWorld(), SummonLocation, SummonForward, Unit, Targets);
 
 	for (AActor* Target : Targets)
-		ApplyDamageEffect(Target, DamageEffect, InDamage, InHitReactTag);
+		ApplyDamageEffect(Target, DamageEffect, AttackRow);
 
 #if ENABLE_DRAW_DEBUG
 	if (CDebug::bDrawHit) {

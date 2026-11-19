@@ -5,6 +5,7 @@
 #include "CGameplayAbility.generated.h"
 
 class ACUnit;
+struct FDataTableRowHandle;
 
 UCLASS()
 class BOSSGAME_API UCGameplayAbility : public UGameplayAbility
@@ -20,9 +21,9 @@ protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
-	FGameplayEffectSpecHandle MakeDamageSpec(TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const;
+	FGameplayEffectSpecHandle MakeDamageSpec(TSubclassOf<UGameplayEffect> Effect, const FDataTableRowHandle& AttackRow) const;
 
-	void ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const;
+	void ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayEffect> Effect, const FDataTableRowHandle& AttackRow) const;
 
 	void ClearActionStateTags() const;
 

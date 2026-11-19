@@ -2,6 +2,7 @@
 #include "GAS/CGameplayTags.h"
 #include "CPlayerController.h"
 #include "CUnit.h"
+#include "CAttackData.h"
 #include "GameFramework/Controller.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -27,21 +28,22 @@ void UCGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-FGameplayEffectSpecHandle UCGameplayAbility::MakeDamageSpec(TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const
+FGameplayEffectSpecHandle UCGameplayAbility::MakeDamageSpec(TSubclassOf<UGameplayEffect> Effect, const FDataTableRowHandle& AttackRow) const
 {
-	if (!Effect) return FGameplayEffectSpecHandle();
+	const FCAttackData* Attack = AttackRow.GetRow<FCAttackData>(GetName());
+	if (!Effect || !Attack) return FGameplayEffectSpecHandle();
 
 	FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(Effect, GetAbilityLevel());
-	Spec.Data->SetSetByCallerMagnitude(CTags::Data_Damage, Damage);
-	if (HitReactTag.IsValid())
-		Spec.Data->AddDynamicAssetTag(HitReactTag);
+	Spec.Data->SetSetByCallerMagnitude(CTags::Data_Damage, Attack->Damage);
+	if (Attack->HitReactTag.IsValid())
+		Spec.Data->AddDynamicAssetTag(Attack->HitReactTag);
 
 	return Spec;
 }
 
-void UCGameplayAbility::ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayEffect> Effect, float Damage, const FGameplayTag& HitReactTag) const
+void UCGameplayAbility::ApplyDamageEffect(AActor* Target, TSubclassOf<UGameplayEffect> Effect, const FDataTableRowHandle& AttackRow) const
 {
-	const FGameplayEffectSpecHandle Spec = MakeDamageSpec(Effect, Damage, HitReactTag);
+	const FGameplayEffectSpecHandle Spec = MakeDamageSpec(Effect, AttackRow);
 	if (!Target || !Spec.IsValid()) return;
 
 	ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, Spec,
