@@ -7,7 +7,7 @@ public class BossGame : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "NavigationSystem",
-			"GameplayAbilities", "GameplayTags", "GameplayTasks", "MotionWarping" });
+			"GameplayAbilities", "GameplayTags", "GameplayTasks", "MotionWarping", "StateTreeModule", "GameplayStateTreeModule" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

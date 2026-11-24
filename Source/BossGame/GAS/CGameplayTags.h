@@ -28,6 +28,7 @@ namespace CTags
 
 	// Lock
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Lock_Move);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Lock_Rotate);
 
 	// Ability
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Attack);
