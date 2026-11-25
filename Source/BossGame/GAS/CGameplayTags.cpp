@@ -28,6 +28,7 @@ namespace CTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Dodge, "Ability.Dodge", "회피 Ability");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Down, "Ability.Down", "다운 Ability");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Skill, "Ability.Skill", "스킬 공통 부모");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Boss_Pattern, "Ability.Boss.Pattern", "보스 패턴");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Data_Damage, "Data.Damage", "데미지 수치");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Data_HitReact_Flinch, "Data.HitReact.Flinch", "경직 데미지");
