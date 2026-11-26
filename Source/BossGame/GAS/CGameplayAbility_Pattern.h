@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GAS/CGameplayAbility.h"
+#include "Engine/DataTable.h"
 #include "CGameplayAbility_Pattern.generated.h"
 
 UCLASS()
@@ -20,6 +21,13 @@ protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
+	// Event.Pattern.Hit
+	virtual void OnPatternHit() {}
+
+private:
+	UFUNCTION()
+	void OnPatternHitEvent(FGameplayEventData EventData);
+
 protected:
 	// 패턴 이름 쿨타임 태그
 	UPROPERTY(EditDefaultsOnly, Category = "Cooldown", meta = (Categories = "Cooldown.Boss"))
@@ -27,4 +35,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Cooldown")
 	float CooldownDuration = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	TSubclassOf<UGameplayEffect> DamageEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (RowType = "/Script/BossGame.CBossAttackData"))
+	FDataTableRowHandle Attack;
 };

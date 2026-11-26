@@ -1,5 +1,6 @@
 #include "GAS/CGameplayAbility_Pattern.h"
 #include "GAS/CGameplayTags.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 
 UCGameplayAbility_Pattern::UCGameplayAbility_Pattern()
 {
@@ -41,5 +42,16 @@ void UCGameplayAbility_Pattern::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
+	// 몽타주 타격 프레임의 노티파이(Event.Pattern.Hit)마다 판정
+	UAbilityTask_WaitGameplayEvent* WaitHit = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+		this, CTags::Event_Pattern_Hit, nullptr, false, true);
+	WaitHit->EventReceived.AddDynamic(this, &UCGameplayAbility_Pattern::OnPatternHitEvent);
+	WaitHit->ReadyForActivation();
+
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+}
+
+void UCGameplayAbility_Pattern::OnPatternHitEvent(FGameplayEventData EventData)
+{
+	OnPatternHit();
 }

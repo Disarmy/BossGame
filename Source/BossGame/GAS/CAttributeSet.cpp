@@ -31,6 +31,16 @@ void UCAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 				return;
 			}
 
+			AActor* Instigator = Data.EffectSpec.GetContext().GetInstigator();
+
+			// 밀어내기: 공격자 중심에서 바깥으로
+			const float Knockback = Data.EffectSpec.GetSetByCallerMagnitude(CTags::Data_Knockback, false, 0.0f);
+			if (Knockback > 0.0f && Instigator) {
+				const float KnockbackDuration = Data.EffectSpec.GetSetByCallerMagnitude(CTags::Data_KnockbackDuration, false, 0.3f);
+				if (ACUnit* Unit = Cast<ACUnit>(GetOwningActor()))
+					Unit->ApplyKnockback(Instigator->GetActorLocation(), Knockback, KnockbackDuration);
+			}
+
 			// 피격 이벤트: 세부 태그를 보내면 부모 Event.Hit 트리거도 같이 발동
 			const FGameplayTagContainer& SpecTags = Data.EffectSpec.GetDynamicAssetTags();
 			FGameplayTag HitTag = CTags::Event_Hit;
@@ -41,7 +51,7 @@ void UCAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 
 			FGameplayEventData EventData;
 			EventData.EventTag = HitTag;
-			EventData.Instigator = Data.EffectSpec.GetContext().GetInstigator();
+			EventData.Instigator = Instigator;
 			EventData.EventMagnitude = LocalDamage;
 			UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetOwningActor(), HitTag, EventData);
 		}

@@ -38,6 +38,10 @@ FGameplayEffectSpecHandle UCGameplayAbility::MakeDamageSpec(TSubclassOf<UGamepla
 	if (Attack->HitReactTag.IsValid())
 		Spec.Data->AddDynamicAssetTag(Attack->HitReactTag);
 
+	if (Attack->Knockback > 0.0f) {
+		Spec.Data->SetSetByCallerMagnitude(CTags::Data_Knockback, Attack->Knockback);
+		Spec.Data->SetSetByCallerMagnitude(CTags::Data_KnockbackDuration, Attack->KnockbackDuration);
+	}
 	return Spec;
 }
 

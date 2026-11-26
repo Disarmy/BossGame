@@ -8,11 +8,10 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-// Sets default values
 ACUnit::ACUnit()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	StencilComponent = CreateDefaultSubobject<UCStencilComponent>(TEXT("StencilComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
@@ -44,7 +43,23 @@ void ACUnit::Die(AActor* Killer)
 	ReceiveDie(Killer);
 }
 
-// Called when the game starts or when spawned
+void ACUnit::ApplyKnockback(const FVector& Origin, float Distance, float Duration)
+{
+	if (Duration <= 0.0f) return;
+
+	FVector Direction = GetActorLocation() - Origin;
+	Direction.Z = 0.0f;
+
+	// 공격자와 같은 위치면 뒤로
+	if (!Direction.Normalize())
+		Direction = -GetActorForwardVector();
+
+	// 연달아 맞으면 새 넉백으로 덮어씀
+	KnockbackVelocity = Direction * (Distance / Duration);
+	KnockbackTimeLeft = Duration;
+	SetActorTickEnabled(true);
+}
+
 void ACUnit::BeginPlay()
 {
 	Super::BeginPlay();
@@ -59,6 +74,21 @@ void ACUnit::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	InitAbilitySystem();
+}
+
+void ACUnit::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+
+	if (KnockbackTimeLeft <= 0.0f) {
+		SetActorTickEnabled(false);
+		return;
+	}
+
+	const float Step = FMath::Min(DeltaSeconds, KnockbackTimeLeft);
+	KnockbackTimeLeft -= Step;
+	AddActorWorldOffset(KnockbackVelocity * Step, true);
 }
 
 void ACUnit::EquipWeapon(TSubclassOf<ACWeapon> EquipWeaponClass)

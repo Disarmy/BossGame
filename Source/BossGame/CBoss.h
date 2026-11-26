@@ -11,4 +11,6 @@ class BOSSGAME_API ACBoss : public ACEnemy
 	
 public:
 	ACBoss();
+
+	virtual void ApplyKnockback(const FVector& Origin, float Distance, float Duration) override;
 };

@@ -25,3 +25,8 @@ ACBoss::ACBoss()
 	GetCapsuleComponent()->SetCanEverAffectNavigation(true);
 	GetCapsuleComponent()->bDynamicObstacle = true;
 }
+
+void ACBoss::ApplyKnockback(const FVector& Origin, float Distance, float Duration)
+{
+	// 넉백 없음
+}

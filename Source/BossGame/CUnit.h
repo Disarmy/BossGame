@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -21,18 +19,18 @@ class BOSSGAME_API ACUnit : public ACharacter, public IAbilitySystemInterface
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ACUnit();
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	virtual void Die(AActor* Killer);
+	virtual void ApplyKnockback(const FVector& Origin, float Distance, float Duration);
 
 	FORCEINLINE ACWeapon* GetWeapon() const { return Weapon; }
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController) override;
+	virtual void Tick(float DeltaSeconds) override;
 
 private:
 	void InitAbilitySystem();
@@ -90,4 +88,7 @@ private:
 	TObjectPtr<ACWeapon> Weapon;
 
 	bool bDefaultGiven = false;
+	// 넉백
+	FVector KnockbackVelocity = FVector::ZeroVector;
+	float KnockbackTimeLeft = 0.0f;
 };

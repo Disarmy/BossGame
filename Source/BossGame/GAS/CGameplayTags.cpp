@@ -20,6 +20,7 @@ namespace CTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Skill_HitBegin, "Event.Skill.HitBegin", "스킬 판정 구간 시작");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Skill_HitEnd, "Event.Skill.HitEnd", "스킬 판정 구간 끝");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Target_Confirm, "Event.Target.Confirm", "조준 확정");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Pattern_Hit, "Event.Pattern.Hit", "보스 패턴 타격 시점");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Lock_Move, "Lock.Move", "이동 차단");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Lock_Rotate, "Lock.Rotate", "회전 차단");
@@ -34,4 +35,6 @@ namespace CTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Data_HitReact_Flinch, "Data.HitReact.Flinch", "경직 데미지");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Data_HitReact_Down, "Data.HitReact.Down", "다운 데미지");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Data_Cooldown, "Data.Cooldown", "쿨타임 시간");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Data_Knockback, "Data.Knockback", "밀어내기 세기");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Data_KnockbackDuration, "Data.KnockbackDuration", "밀어내기 시간");
 }
