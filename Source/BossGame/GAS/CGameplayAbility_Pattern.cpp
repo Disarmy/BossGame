@@ -42,6 +42,11 @@ void UCGameplayAbility_Pattern::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
+	UAbilityTask_WaitGameplayEvent* WaitHitBegin = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+		this, CTags::Event_Pattern_HitBegin, nullptr, false, true);
+	WaitHitBegin->EventReceived.AddDynamic(this, &UCGameplayAbility_Pattern::OnPatternHitBeginEvent);
+	WaitHitBegin->ReadyForActivation();
+
 	// 몽타주 타격 프레임의 노티파이(Event.Pattern.Hit)마다 판정
 	UAbilityTask_WaitGameplayEvent* WaitHit = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
 		this, CTags::Event_Pattern_Hit, nullptr, false, true);
@@ -54,4 +59,9 @@ void UCGameplayAbility_Pattern::ActivateAbility(const FGameplayAbilitySpecHandle
 void UCGameplayAbility_Pattern::OnPatternHitEvent(FGameplayEventData EventData)
 {
 	OnPatternHit();
+}
+
+void UCGameplayAbility_Pattern::OnPatternHitBeginEvent(FGameplayEventData EventData)
+{
+	OnPatternHitBegin(EventData.EventMagnitude);
 }

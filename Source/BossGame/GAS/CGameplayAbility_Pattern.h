@@ -24,9 +24,15 @@ protected:
 	// Event.Pattern.Hit
 	virtual void OnPatternHit() {}
 
+	// Event.Pattern.HitBegin 
+	virtual void OnPatternHitBegin(float Duration) {}
+
 private:
 	UFUNCTION()
 	void OnPatternHitEvent(FGameplayEventData EventData);
+
+	UFUNCTION()
+	void OnPatternHitBeginEvent(FGameplayEventData EventData);
 
 protected:
 	// 패턴 이름 쿨타임 태그

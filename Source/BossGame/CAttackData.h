@@ -20,7 +20,7 @@ struct FCAttackData : public FTableRowBase
 
 	// 공격자 중심에서 바깥으로 밀려나는 거리 cm
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0.0"))
-	float Knockback = 0.0f;	
+	float Knockback = 0.0f;
 
 	// 밀려나는 데 걸리는 시간
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0.05"))

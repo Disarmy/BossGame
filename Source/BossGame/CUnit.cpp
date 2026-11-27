@@ -80,7 +80,6 @@ void ACUnit::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-
 	if (KnockbackTimeLeft <= 0.0f) {
 		SetActorTickEnabled(false);
 		return;

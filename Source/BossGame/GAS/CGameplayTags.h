@@ -26,6 +26,7 @@ namespace CTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Skill_HitEnd);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Target_Confirm);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Pattern_Hit);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Pattern_HitBegin);
 
 	// Lock
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Lock_Move);
